@@ -1,0 +1,134 @@
+// Endpoint testing using REST Client extension in VSCode (Inspired from CSSE6400 assignment)
+
+@baseUrl = https://0b5ff8b0.uqcloud.net/
+@jwtToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic3R1ZGVudCIsInVzZXJuYW1lIjoiczQ3NTk0ODcifQ.PYGpsxjuzysuzHIad-l5VO9MbEYNBhx9X5QSfq4lMuw
+
+### Health
+GET {{baseUrl}}/api/health
+
+### Get all emails from the server
+GET {{baseUrl}}/api/project
+Authorization: Bearer {{jwtToken}}
+
+{
+    "username": "s4759487"
+}
+
+### Get a specific email from the server
+GET {{baseUrl}}/api/project?id=eq.2223
+Authorization: Bearer {{jwtToken}}
+
+{
+    "username": "s4759487"
+}
+
+### get all locations for all projects
+GET {{baseUrl}}/api/location
+Authorization: Bearer {{jwtToken}}
+    
+{
+    "username": "s4759487"
+}
+
+### get all locations for 1 project
+GET {{baseUrl}}/api/location?project_id=eq.2223
+Authorization: Bearer {{jwtToken}}
+
+{
+    "username": "s4759487"
+}
+
+### post a TEST_LOCATION on the server
+POST {{baseUrl}}/api/location
+Authorization : Bearer {{jwtToken}}
+
+{
+    "id": 2033,
+    "project_id": 2223,
+    "location_name": "UQ St Lucia",
+    "location_trigger": "UQ St Lucia",
+    "username": "s4759487"
+}
+
+### Delete
+DELETE {{baseUrl}}/api/location?id=eq.2033
+Authorization: Bearer {{jwtToken}}
+
+{
+    "username": "s4759487"
+}
+
+### post a TEST_ITEM on the server
+POST {{baseUrl}}/api/project
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{   
+    "id": 2030,
+    "username": "s4759487",
+    "title": "Important information about your account.",
+    "description": "Dear customer,\nWe have noticed some suspicious activity on your account. Please click [here](https://scam-check.uq.edu.au?userId=uqehugh3) to reset your password or [here](https://scamer-checker.uq.edu.au) to go."
+}
+
+
+### Delete
+DELETE {{baseUrl}}/api/project?id=eq.2030
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+    
+{
+    "username": "s4759487"
+}
+
+### Update
+PATCH {{baseUrl}}/api/project?id=eq.2030
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "username": "s4759487",
+    "title": "Important information about your account.",
+    "description": "this is updated description"
+}
+
+### post to Add a new tracking entry
+POST {{baseUrl}}/api/tracking
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "project_id": 2030,
+    "location_id": 5533,
+    "points": 10,
+    "username": "s4759487",
+    "participant_username": "s4759487-par"
+}
+
+### get all tracking entries
+GET {{baseUrl}}/api/tracking
+Authorization : Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "project_id": 2030,
+    "location_id": 5533,
+    "username": "s4759487"
+}
+
+### get project participant count
+GET {{baseUrl}}/api/project_participant_counts
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "username": "s4759487"
+}
+
+### get location participant count
+GET {{baseUrl}}/api/location_participant_counts
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "username": "s4759487"
+}
