@@ -1,13 +1,15 @@
-// Profile.jsx
 import { View, Text, Button, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import ImagePickerScreen from '../components/imagePicker'; // Import the ImagePicker component
- 
+import EditProfile from '../components/edit-profile'; // Import the EditProfile component
+
 export default function Profile() {
   const router = useRouter();
   const [profileImage, setProfileImage] = useState(null); // State to hold the selected profile image
+  const [profileUsername, setProfileUsername] = useState('participant_username'); // Default username state
   const [isPickerVisible, setPickerVisible] = useState(false); // State to control modal visibility
+  const [isUserEditing, setUserEditing] = useState(false); // State to control edit mode
 
   // Function to handle the selected image from the ImagePicker
   function handleImageChange(image) {
@@ -19,15 +21,18 @@ export default function Profile() {
     setPickerVisible(!isPickerVisible);
   }
 
-  function handleEditProfile() {
-    router.push('/edit-profile');
+  function handleUsernameChange(username) {
+    setProfileUsername(username);
   }
 
+  function toggleUserEditing() {
+    setUserEditing(!isUserEditing);
+  }
 
   return (
     <View style={styles.container}>
       {/* Profile Information */}
-      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Profile</Text>
+      <Text style={styles.profileHeader}>Your Profile</Text>
 
       {/* Image Picker Section */}
       <View style={styles.profileSection}>
@@ -38,7 +43,7 @@ export default function Profile() {
           ) : (
             <Image source={require('../assets/icons/cheese.png')} style={styles.profileImage} />
           )}
-          <Text style={styles.tapText}>Tap to Change</Text>
+          <Text style={styles.tapText}>Tap to add photo</Text>
         </TouchableOpacity>
       </View>
 
@@ -48,17 +53,19 @@ export default function Profile() {
       </Modal>
 
       {/* Other Profile Content */}
-      <Text className="text-base mt-5">Name: John Doe</Text>
-      <Text className="text-base mt-2">Email: john.doe@example.com</Text>
-
-      {/* Edit Profile Button */}
-      <View className="mt-5">
-        <Button title="Edit Profile" onPress={() => router.push('/edit-profile')} />
+      <View style={styles.inputWrapper}>
+        <TouchableOpacity onPress={toggleUserEditing}>
+          <Text style={styles.inputText}>{profileUsername}</Text>
+        </TouchableOpacity>
       </View>
 
+      <Modal visible={isUserEditing} animationType="slide" onRequestClose={toggleUserEditing}>
+        <EditProfile username={profileUsername} onUsernameChange={handleUsernameChange} onClose={toggleUserEditing} />
+      </Modal> 
+
       {/* Go Back Button */}
-      <View className="mt-3">
-        <Button onPress={() => router.back()} title="Go Back" />
+      <View style={styles.buttonWrapper}>
+        <Button onPress={() => router.back()} title="Go Back" color="#ff6f61" />
       </View>
     </View>
   );
@@ -72,6 +79,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 40,
   },
+  profileHeader: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ff6f61',
+    marginBottom: 20,
+  },
   profileSection: {
     alignItems: 'center',
     marginBottom: 20,
@@ -81,21 +94,41 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 100,
     borderWidth: 1,
-    borderColor: '#ff6f61',
+    borderColor: '#d3d3d3',
     width: 120,
     height: 120,
+    backgroundColor: '#f0f0f0',
     overflow: 'hidden',
+    position: 'relative',
   },
   profileImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    width: '90%',
+    height: '90%',
+    resizeMode: 'contain',
   },
   tapText: {
     position: 'absolute',
-    color: '#ff6f61',
-    fontWeight: 'bold',
+    color: '#c3c3c3',
+    fontSize: 12,
+    bottom: 5,
     textAlign: 'center',
-    top: '50%',
+  },
+  inputWrapper: {
+    width: '80%',
+    borderRadius: 30,
+    backgroundColor: '#f0f0f0',
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginTop: 20,
+  },
+  inputText: {
+    fontSize: 16,
+    color: '#8c8c8c',
+    textAlign: 'center',
+  },
+  buttonWrapper: {
+    width: '80%',
+    marginTop: 30,
   },
 });
+
