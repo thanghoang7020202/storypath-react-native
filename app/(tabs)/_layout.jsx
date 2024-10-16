@@ -21,6 +21,14 @@ export default function _layout() {
       tabBarLabel: 'Tips',
       headerTitle: 'Tips'
     }} />
+
+    <Tabs.Screen name='ShowMap' options={{
+      tabBarIcon: ({color}) => (
+        <Feather name="map" size={24} color={color} />
+      ),
+      tabBarLabel: 'Map',
+      headerTitle: 'Map'
+    }} />
     
    </Tabs>
   )

@@ -1,34 +1,65 @@
-import { View, Text, Button, TextInput, Image, TouchableOpacity, StyleSheet } from 'react-native';
-import React from 'react';
+// Profile.jsx
+import { View, Text, Button, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
+import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-
+import ImagePickerScreen from '../components/imagePicker'; // Import the ImagePicker component
+ 
 export default function Profile() {
   const router = useRouter();
+  const [profileImage, setProfileImage] = useState(null); // State to hold the selected profile image
+  const [isPickerVisible, setPickerVisible] = useState(false); // State to control modal visibility
+
+  // Function to handle the selected image from the ImagePicker
+  function handleImageChange(image) {
+    setProfileImage(image); // Update the profile image
+  }
+
+  // Function to open/close the image picker
+  function toggleImagePicker() {
+    setPickerVisible(!isPickerVisible);
+  }
+
+  function handleEditProfile() {
+    router.push('/edit-profile');
+  }
+
 
   return (
     <View style={styles.container}>
-      {/* Profile Picture Section */}
+      {/* Profile Information */}
+      <Text style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20 }}>Profile</Text>
+
+      {/* Image Picker Section */}
       <View style={styles.profileSection}>
-        <TouchableOpacity style={styles.imageWrapper}>
-          <Image
-            source={require('../assets/icons/cheese.png')}
-            style={styles.profileImage}
-          />
-          <Text style={styles.tapText}>Tap to add photo</Text>
+        <TouchableOpacity style={styles.imageWrapper} onPress={toggleImagePicker}>
+          {/* Display the selected profile image or default image */}
+          {profileImage ? (
+            <Image source={{ uri: profileImage.uri }} style={styles.profileImage} />
+          ) : (
+            <Image source={require('../assets/icons/cheese.png')} style={styles.profileImage} />
+          )}
+          <Text style={styles.tapText}>Tap to Change</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Username Input */}
-      <View style={styles.inputSection}>
-        <TextInput
-          style={styles.usernameInput}
-          placeholder="participant_username"
-          placeholderTextColor="#c4c4c4"
-        />
+      {/* Image Picker Modal */}
+      <Modal visible={isPickerVisible} animationType="slide" onRequestClose={toggleImagePicker}>
+        <ImagePickerScreen onImageSelect={handleImageChange} onClose={toggleImagePicker} />
+      </Modal>
+
+      {/* Other Profile Content */}
+      <Text className="text-base mt-5">Name: John Doe</Text>
+      <Text className="text-base mt-2">Email: john.doe@example.com</Text>
+
+      {/* Edit Profile Button */}
+      <View className="mt-5">
+        <Button title="Edit Profile" onPress={() => router.push('/edit-profile')} />
       </View>
 
       {/* Go Back Button */}
-      <Button onPress={() => router.back()} title="Go Back" />
+      <View className="mt-3">
+        <Button onPress={() => router.back()} title="Go Back" />
+      </View>
     </View>
   );
 }
@@ -66,16 +97,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
     top: '50%',
-  },
-  inputSection: {
-    marginBottom: 20,
-    width: '80%',
-  },
-  usernameInput: {
-    borderBottomWidth: 1,
-    borderBottomColor: '#ff6f61',
-    fontSize: 18,
-    textAlign: 'center',
-    paddingVertical: 10,
   },
 });

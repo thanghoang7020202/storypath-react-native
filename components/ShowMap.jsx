@@ -3,7 +3,6 @@ import { StyleSheet, Appearance, View, SafeAreaView, Text } from "react-native";
 import MapView, { Circle } from "react-native-maps";
 import * as Location from 'expo-location';
 import { getDistance } from "geolib";
-
 import { locations } from "../data/locations";
 
 // Define Stylesheet

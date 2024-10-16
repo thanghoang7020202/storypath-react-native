@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { getProjects, deleteProject } from "../components/api";
+import { getProjects, deleteProject, getProjectParticipantCounts } from "../components/api";
+import { router } from 'expo-router';
 
 export default function ProjectList() {
   const [projectList, setProjectList] = useState([]);
+  const [projectParticipantCounts, setProjectParticipantCounts] = useState([]);
   const navigation = useNavigation();
 
   // Fetch projects when the component mounts
@@ -12,7 +14,10 @@ export default function ProjectList() {
     const fetchProjects = async () => {
       try {
         const data = await getProjects();
+        const count = await getProjectParticipantCounts();
+        
         setProjectList(data);
+        setProjectParticipantCounts(count);
       } catch (error) {
         console.error('Error fetching projects:', error);
       }
@@ -39,12 +44,13 @@ export default function ProjectList() {
       <View style={styles.projectInfo}>
         <Text style={styles.projectTitle}>{item.title}</Text>
         <View style={styles.participantsBadge}>
-          <Text style={styles.participantsText}>Participants: {item.participants}</Text>
+          <Text style={styles.participantsText}>Participants: 
+            {projectParticipantCounts.find((count) => count.project_id === item.id)?.number_participants || 0}</Text>
         </View>
       </View>
       <TouchableOpacity
         style={styles.arrowButton}
-        onPress={() => navigation.navigate('ProjectDetails', { projectId: item.id })}
+        onPress={() => router.push(`/projects/${item.id}`)}
       >
         <Text style={styles.arrowText}>➔</Text>
       </TouchableOpacity>
@@ -61,7 +67,7 @@ export default function ProjectList() {
           keyExtractor={(item) => item.id.toString()}
         />
       ) : (
-        <Text>No projects available.</Text>
+        <Text>No projects available. Keep loading...</Text>
       )}
     </View>
   );
