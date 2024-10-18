@@ -150,9 +150,9 @@ export const getTrackings = async () => {
 // 11. POST Request - Add a new tracking entry
 export const addTracking = async (newTracking) => {
     try {
-        await apiRequest('/tracking', 'POST', newTracking);
+        const message = await apiRequest('/tracking', 'POST', newTracking);
     } catch (error) {
-        console.error('Error adding tracking:', error);
+        console.error('Error adding tracking:', error.message);
     }
 };
 

@@ -14,13 +14,14 @@ export default function _layout() {
       tabBarLabel: 'Blog',
       headerTitle: 'Blog'
     }} />
-    <Tabs.Screen name='tips' options={{
+    <Tabs.Screen name='ProjectHomeScreen' options={{
       tabBarIcon: ({color}) => (
-        <Feather name="list" size={24} color={color} />
+        <Feather name="home" size={24} color={color} />
       ),
-      tabBarLabel: 'Tips',
-      headerTitle: 'Tips'
+      tabBarLabel: 'ProjectHomeScreen',
+      headerTitle: 'ProjectHomeScreen'
     }} />
+  
 
     <Tabs.Screen name='ShowMap' options={{
       tabBarIcon: ({color}) => (

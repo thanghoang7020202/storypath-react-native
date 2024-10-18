@@ -34,7 +34,7 @@ const styles = {
 };
 
 // Image Picker Screen Component
-const ImagePickerScreen = ({ onImageSelect, onClose }) => {
+const ImagePickerScreen = ({ onImageSelect, onCloseImage }) => {
   const [selectedImage, setSelectedImage] = useState({});
 
   // Function to handle photo selection
@@ -57,7 +57,7 @@ const ImagePickerScreen = ({ onImageSelect, onClose }) => {
   const handleSave = () => {
     if (selectedImage) {
       onImageSelect(selectedImage); // Pass the selected image to the parent component
-      onClose(); // Close the image picker
+      onCloseImage(); // Close the image picker
     }
   };
 
@@ -107,7 +107,7 @@ const ImagePickerScreen = ({ onImageSelect, onClose }) => {
             )}
 
             {/* Optionally, you could add a "Cancel" button */}
-            <Button title="Cancel" onPress={onClose} />
+            <Button title="Cancel" onPress={onCloseImage} />
         </View>
     );
 };

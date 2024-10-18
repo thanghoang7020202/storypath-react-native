@@ -1,27 +1,14 @@
 import { View, Text, TextInput, Button, Image, TouchableOpacity, Modal, Alert } from 'react-native';
 import React, { useState } from 'react';
-import { useRouter } from 'expo-router';
 import ImagePickerScreen from './imagePicker'; // Import ImagePicker component
+//import { getTrackings, addTracking, updateTracking, deleteTracking } from './api'; // Import API functions
 
-export default function EditProfile({ username, onUsernameChange, onClose }) {
-  const router = useRouter();
-  const [profileImage, setProfileImage] = useState(null); // Selected profile image
-  const [isPickerVisible, setPickerVisible] = useState(false); // Controls ImagePicker visibility
+export default function EditProfile({ username, onUsernameChange, onCloseEditProfile }) {
   const [name, setName] = useState(username || ''); // Username state (or default value)
   const [email, setEmail] = useState('john.doe@example.com'); // Default email state
   const [initialData, setInitialData] = useState({ name, email }); // Used to track unsaved changes
   const [isSubmitting, setIsSubmitting] = useState(false); // Save button state
   const [errorFields, setErrorFields] = useState([]); // Track invalid fields
-
-  // Function to handle image selection from ImagePicker
-  function handleImageChange(image) {
-    setProfileImage(image); // Update profile image
-  }
-
-  // Toggle ImagePicker modal visibility
-  function toggleImagePicker() {
-    setPickerVisible(!isPickerVisible);
-  }
 
   // Handle Save button action
   function handleSave() {
@@ -34,21 +21,35 @@ export default function EditProfile({ username, onUsernameChange, onClose }) {
     if (errors.length > 0) {
       return; // Prevent saving if validation errors exist
     }
+    
+    // if the username is in tracking, use the username from tracking
+    // getTrackings().then((trackings) => {
+    //   const tracking = trackings.find((tracking) => tracking.participant_username === name);
+    //   if (tracking) {
+    //     console.log('Participant found in tracking:', tracking);
+    //   } else {
+    //     // add a new tracking entry
+    //     addTracking({ participant_username: name }).then(() => {
+    //       console.log('New tracking entry added for:', name);
+    //     });
+    //   }
+    // });
 
     // Simulate saving with loading state
     setIsSubmitting(true);
     setTimeout(() => {
-      console.log('Profile saved:', { name, email, profileImage });
+      console.log('Profile saved:', { name, email });
       setInitialData({ name, email }); // Update initial data
       onUsernameChange(name); // Update username in parent
       setIsSubmitting(false);
-      onClose(); // Close modal after saving
+      onCloseEditProfile();
+      // go back to the profile page after saving;
     }, 1000);
   }
 
   // Check for unsaved changes
   function hasUnsavedChanges() {
-    return name !== initialData.name || email !== initialData.email || profileImage;
+    return name !== initialData.name || email !== initialData.email;
   }
 
   // Handle Cancel button with unsaved changes confirmation
@@ -59,11 +60,11 @@ export default function EditProfile({ username, onUsernameChange, onClose }) {
         'You have unsaved changes. Do you want to discard them?',
         [
           { text: 'No', style: 'cancel' },
-          { text: 'Yes', onPress: onClose }, // Discard changes and close
+          { text: 'Yes', onPress: onCloseEditProfile }, // Discard changes and close
         ]
       );
     } else {
-      onClose(); // No unsaved changes, close immediately
+      onCloseEditProfile(); // No unsaved changes, close immediately
     }
   }
 
@@ -72,28 +73,13 @@ export default function EditProfile({ username, onUsernameChange, onClose }) {
       {/* Edit Profile Header */}
       <Text style={styles.headerText}>Edit Profile</Text>
 
-      {/* Profile Image Section */}
-      <TouchableOpacity style={styles.imageWrapper} onPress={toggleImagePicker}>
-        {profileImage ? (
-          <Image source={{ uri: profileImage.uri }} style={styles.profileImage} />
-        ) : (
-          <Image source={require('../assets/icons/cheese.png')} style={styles.profileImage} />
-        )}
-        <Text style={styles.tapText}>Tap to Change</Text>
-      </TouchableOpacity>
-
-      {/* Image Picker Modal */}
-      <Modal visible={isPickerVisible} animationType="slide" onRequestClose={toggleImagePicker}>
-        <ImagePickerScreen onImageSelect={handleImageChange} onClose={toggleImagePicker} />
-      </Modal>
-
       {/* Edit Name Input */}
       <Text style={styles.label}>Name</Text>
       <TextInput
         value={name}
         onChangeText={setName}
         style={[styles.input, errorFields.includes('name') && styles.errorInput]}
-        placeholder="Enter your name"
+        placeholder="Enter your username"
       />
       {errorFields.includes('name') && <Text style={styles.errorText}>Name is required.</Text>}
 
@@ -109,11 +95,13 @@ export default function EditProfile({ username, onUsernameChange, onClose }) {
       {errorFields.includes('email') && <Text style={styles.errorText}>Email is required.</Text>}
 
       {/* Save Button */}
-      <Button title={isSubmitting ? 'Saving...' : 'Save Profile'} onPress={handleSave} disabled={isSubmitting} style={styles.buttonWrapper} color="#ff6f61"/>
+      <View style={styles.buttonWrapper}>
+        <Button title={isSubmitting ? 'Saving...' : 'Save Profile'} onPress={handleSave} disabled={isSubmitting} color="#ff6f61"/>
+      </View>
 
       {/* Cancel Button */}
-      <View style={styles.buttonWrapper}>
-        <Button onPress={handleCancel} title="Cancel" color="#ff6f61"/>
+      <View  style={styles.buttonWrapper}>
+        <Button onPress={handleCancel} title={hasUnsavedChanges() ? 'Cancel' : 'Close'} style={styles.buttonWrapper} color="#ff6f61"/>
       </View>
     </View>
   );
@@ -132,24 +120,6 @@ const styles = {
     fontWeight: 'bold',
     color: '#ff6f61',
     marginBottom: 20,
-  },
-  imageWrapper: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: '#d3d3d3',
-    width: 120,
-    height: 120,
-    backgroundColor: '#f0f0f0',
-    overflow: 'hidden',
-    position: 'relative',
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: '90%',
-    height: '90%',
-    resizeMode: 'contain',
   },
   tapText: {
     position: 'absolute',

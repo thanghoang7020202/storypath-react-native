@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, router } from '@react-navigation/native';
+import { useGlobalSearchParams } from 'expo-router';
 import { getProjects, deleteProject, getProjectParticipantCounts } from "../components/api";
-import { router } from 'expo-router';
 
 export default function ProjectList() {
+  const { id } = useGlobalSearchParams();
   const [projectList, setProjectList] = useState([]);
   const [projectParticipantCounts, setProjectParticipantCounts] = useState([]);
   const navigation = useNavigation();
@@ -13,9 +14,11 @@ export default function ProjectList() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const data = await getProjects();
+        let data = await getProjects();
         const count = await getProjectParticipantCounts();
         
+        //data = data.filter((project) => project.id !== id);
+
         setProjectList(data);
         setProjectParticipantCounts(count);
       } catch (error) {
@@ -24,7 +27,7 @@ export default function ProjectList() {
     };
 
     fetchProjects();
-  }, []);
+  }, [id]);
 
   // Handle deleting a project
   const handleDelete = async (projectId) => {
@@ -50,7 +53,8 @@ export default function ProjectList() {
       </View>
       <TouchableOpacity
         style={styles.arrowButton}
-        onPress={() => router.push(`/projects/${item.id}`)}
+        // go to the projectHomeScreen after clicking the arrow
+        onPress={() => router.push({ pathname: `./ProjectHomeScreen/${item.id}`, params: item })}
       >
         <Text style={styles.arrowText}>➔</Text>
       </TouchableOpacity>

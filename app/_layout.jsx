@@ -1,13 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Feather, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
+import { profile } from './profile';
 
 // Custom Drawer Content Component
 const CustomDrawerContent = (props) => {
   const pathname = usePathname();
+
+  // const [username, setUsername] = useState('participant_username');
+
+  // function updateUsername(name) {
+  //   setUsername(name);
+  // }
+  // Get the username and updateUsername function passed from Layout
+  const { username } = props;
 
   useEffect(() => {
     console.log('Current Path', pathname);
@@ -17,7 +26,7 @@ const CustomDrawerContent = (props) => {
     <DrawerContentScrollView {...props}>
       {/* User Info Section */}
       <View style={styles.infoContainer}>
-        <Text style={styles.currentUser}>Current User: participant_username</Text>
+        <Text style={styles.currentUser}>Current User: {username}</Text>
       </View>
 
       {/* Drawer Items */}
@@ -38,6 +47,7 @@ const CustomDrawerContent = (props) => {
         label={'Profile'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/profile' ? '#fff' : '#000' }]}
         style={{ backgroundColor: pathname === '/profile' ? '#f07a71' : '#fff' }}
+        // move updateUsername to the profile component
         onPress={() => router.push('/profile')}
       />
 
@@ -78,9 +88,16 @@ const CustomDrawerContent = (props) => {
 
 // Main Layout with Drawer
 export default function Layout() {
+  const [username, setUsername] = useState('participant_username');
+
+  // Function to update the username
+  function updateUsername(newUsername) {
+    setUsername(newUsername);
+  }
+
   return (
     <Drawer
-      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      drawerContent={(props) => <CustomDrawerContent {...props} username={username} />}
       screenOptions={{ headerShown: false }}>
       <Drawer.Screen name="index" options={{ headerShown: true, headerTitle: 'Home' }} />
       <Drawer.Screen name="about" options={{ headerShown: true, headerTitle: 'About' }} />
