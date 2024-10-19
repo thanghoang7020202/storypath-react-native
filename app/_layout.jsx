@@ -6,6 +6,8 @@ import { Feather, MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
 import { profile } from './profile';
 
+import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
+
 // Custom Drawer Content Component
 const CustomDrawerContent = (props) => {
   const pathname = usePathname();
@@ -96,7 +98,8 @@ export default function Layout() {
   }
 
   return (
-    <Drawer
+    <UsernameProvider>
+      <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} username={username} />}
       screenOptions={{ headerShown: false }}>
       <Drawer.Screen name="index" options={{ headerShown: true, headerTitle: 'Home' }} />
@@ -104,6 +107,7 @@ export default function Layout() {
       <Drawer.Screen name="profile" options={{ headerShown: true, headerTitle: 'Profile' }} />
       <Drawer.Screen name="projects" options={{ headerShown: true, headerTitle: 'Projects' }} />
     </Drawer>
+    </UsernameProvider>
   );
 }
 

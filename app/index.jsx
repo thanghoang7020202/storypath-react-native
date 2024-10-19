@@ -1,8 +1,9 @@
 import { View, Text, Button, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import React, { useState } from 'react';
 import { router } from "expo-router";
+
+import { useUsername } from './usernameContext';  // Use the context
 import Profile from './profile'; // Import the Profile component
-import { username } from './username'; // Import the UserContext object
 
 export default function Index() {
 
@@ -20,8 +21,6 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-      {/* UserContext using here, update its value = user (useState object) */}
-      <username.Provider value={user}>
         <Text style={styles.title}>Welcome to StoryPath</Text>
         <Text style={styles.subtitle}>Explore Unlimited Location-based Experiences</Text>
         <Text style={styles.description}>
@@ -42,7 +41,6 @@ export default function Index() {
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Explore Projects</Text>
         </TouchableOpacity>
-      </username.Provider>
     </View>
   );
 }
