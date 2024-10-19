@@ -1,7 +1,7 @@
 import { View, Text, TextInput, Button, Image, TouchableOpacity, Modal, Alert } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ImagePickerScreen from './imagePicker'; // Import ImagePicker component
-//import { getTrackings, addTracking, updateTracking, deleteTracking } from './api'; // Import API functions
+import { getTracking, getTrackings, getProjects, getLocations } from './api'; // Import API functions
 
 export default function EditProfile({ username, onUsernameChange, onCloseEditProfile }) {
   const [name, setName] = useState(username || ''); // Username state (or default value)
@@ -9,6 +9,40 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
   const [initialData, setInitialData] = useState({ name, email }); // Used to track unsaved changes
   const [isSubmitting, setIsSubmitting] = useState(false); // Save button state
   const [errorFields, setErrorFields] = useState([]); // Track invalid fields
+
+  const fetchTracking = async () => {
+    try {
+      let data = await getTrackings();
+      let projectList = await getProjects();
+      let locationList = await getLocations();
+
+      data = data.filter((tracking) => tracking.participant_username === name);
+      
+      console.log('Tracking data:', data, name);
+
+      if (data.length > 0) {
+        projectList = projectList.filter((project) => project.id === data[0].project_id);
+        locationList = locationList.filter((location) => location.id === data[0].location_id);
+        // Display the previous tracking data project names and location names
+        Alert.alert(
+          "Welcome back " + name + "!",
+          "Your previous tracking data has been restored.\n\n" +
+          "Previous project: " + projectList[0].title + "\n" +
+          "Previous location: " + locationList[0].location_name + "\n" +
+          "Previous points: " + data[0].points + "\n" +
+          "Enjoy your journey!"
+        );
+      } else {
+        Alert.alert( "Welcome to StoryPath " + name + "!",
+          "You have successfully created your profile.\n\n" +
+          "You can now explore unlimited location-based experiences with StoryPath. From city tours to treasure hunts, the possibilities are endless!\n\n" +
+          "Please keep in mind that this username will not be saved if you not participate in any project.\n\n Enjoy your journey!",
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching tracking:', error);
+    }
+  };
 
   // Handle Save button action
   function handleSave() {
@@ -21,19 +55,8 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
     if (errors.length > 0) {
       return; // Prevent saving if validation errors exist
     }
-    
-    // if the username is in tracking, use the username from tracking
-    // getTrackings().then((trackings) => {
-    //   const tracking = trackings.find((tracking) => tracking.participant_username === name);
-    //   if (tracking) {
-    //     console.log('Participant found in tracking:', tracking);
-    //   } else {
-    //     // add a new tracking entry
-    //     addTracking({ participant_username: name }).then(() => {
-    //       console.log('New tracking entry added for:', name);
-    //     });
-    //   }
-    // });
+
+    fetchTracking();
 
     // Simulate saving with loading state
     setIsSubmitting(true);

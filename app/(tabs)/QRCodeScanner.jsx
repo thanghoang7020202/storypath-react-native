@@ -1,10 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import ConfettiCannon from 'react-native-confetti-cannon';
 
 export default function QRCodeScanner() {
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState('');
+  const [fireworkVisible, setFireworkVisible] = useState(false);
+  const fireworkRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
 
   if (!permission) {
@@ -25,6 +28,8 @@ export default function QRCodeScanner() {
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setScannedData(data);
+    setFireworkVisible(false);  // Reset firework visibility before showing it again
+
     // Alert the scanned data with 2 buttons: Continue and Try Again
     Alert.alert(
       'Scanned Data',
@@ -32,11 +37,34 @@ export default function QRCodeScanner() {
       [
         {
           text: 'Continue',
-          onPress: () => console.log('Continue Pressed'),
+          onPress: () => {
+            console.log('Continue Pressed');
+            triggerFirework();
+          },
         },
         {
           text: 'Try Again',
           onPress: () => setScanned(false),
+        },
+      ],
+      { cancelable: false }
+    );
+  };
+
+  const triggerFirework = () => {
+    setFireworkVisible(true);
+    setTimeout(() => {
+      setFireworkVisible(false); // Hide the firework after it finishes
+    }, 3000); // Adjust the duration to match the firework animation length
+    Alert.alert(
+      'Congratulations!',
+      'You have successfully find one of our favorite locations!',
+      [
+        {
+          text: 'Continue',
+          onPress: () => {
+            console.log('Continue Pressed');
+          },
         },
       ],
       { cancelable: false }
@@ -50,11 +78,23 @@ export default function QRCodeScanner() {
         type='front'
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
       />
+
       {scanned && (
         <View style={styles.scanResultContainer}>
           <Text style={styles.scanResultText}>Scanned Data: {scannedData}</Text>
           <Button title="Scan Again" onPress={() => setScanned(false)} color="#8A2BE2" />
         </View>
+      )}
+
+      {fireworkVisible && (
+        <ConfettiCannon
+          ref={fireworkRef}
+          count={50}
+          origin={{ x: -10, y: 0 }}
+          explosionSpeed={350}
+          fallSpeed={2500}
+          fadeOut
+        />
       )}
     </View>
   );

@@ -147,6 +147,17 @@ export const getTrackings = async () => {
     }
 };
 
+// 10.1 GET Request - Fetch a single tracking entry
+export const getTracking = async (trackingId) => {
+    try {
+        const data = await apiRequest(`/tracking?id=eq.${trackingId}`);
+        console.log('Tracking:', data);
+        return data;
+    } catch (error) {
+        console.error('Error fetching tracking:', error);
+    }
+};
+
 // 11. POST Request - Add a new tracking entry
 export const addTracking = async (newTracking) => {
     try {
