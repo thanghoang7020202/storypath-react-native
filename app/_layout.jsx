@@ -38,7 +38,7 @@ const CustomDrawerContent = (props) => {
         )}
         label={'Welcome'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/' ? '#f07a71' : '#fff' }}
+        style={{ backgroundColor: pathname === '/' ? '#8A2BE2' : '#fff' }}
         onPress={() => router.push('/')}
       />
 
@@ -48,7 +48,7 @@ const CustomDrawerContent = (props) => {
         )}
         label={'Profile'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/profile' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/profile' ? '#f07a71' : '#fff' }}
+        style={{ backgroundColor: pathname === '/profile' ? '#8A2BE2' : '#fff' }}
         // move updateUsername to the profile component
         onPress={() => router.push('/profile')}
       />
@@ -59,7 +59,7 @@ const CustomDrawerContent = (props) => {
         )}
         label={'Projects'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/projects' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/projects' ? '#f07a71' : '#fff' }}
+        style={{ backgroundColor: pathname === '/projects' ? '#8A2BE2' : '#fff' }}
         onPress={() => router.push('/projects')}
       />
 
@@ -69,7 +69,7 @@ const CustomDrawerContent = (props) => {
         )}
         label={'ShowMap'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/ShowMap' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/ShowMap' ? '#f07a71' : '#fff' }}
+        style={{ backgroundColor: pathname === '/ShowMap' ? '#8A2BE2' : '#fff' }}
         onPress={() => router.push('/ShowMap')}
       />
 
@@ -79,7 +79,7 @@ const CustomDrawerContent = (props) => {
         )}
         label={'About'}
         labelStyle={[styles.navItemLabel, { color: pathname === '/about' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/about' ? '#f07a71' : '#fff' }}
+        style={{ backgroundColor: pathname === '/about' ? '#8A2BE2' : '#fff' }}
         onPress={() => router.push('/about')}
       />
     </DrawerContentScrollView>
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#f07a71',
+    color: '#8A2BE2',
     marginBottom: 10,
   },
   subtitle: {
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   button: {
-    backgroundColor: '#f07a71',
+    backgroundColor: '#8A2BE2',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 5,

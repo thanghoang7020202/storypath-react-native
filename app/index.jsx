@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#f07a71',
+    color: '#8A2BE2',
     marginBottom: 10,
   },
   subtitle: {
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   button: {
-    backgroundColor: '#f07a71',
+    backgroundColor: '#8A2BE2',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 5,

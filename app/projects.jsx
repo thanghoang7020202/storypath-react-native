@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ff6f61',
+    color: '#8A2BE2',
     marginBottom: 20,
     textAlign: 'center',
   },
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   participantsBadge: {
-    backgroundColor: '#ff6f61',
+    backgroundColor: '#8A2BE2',
     borderRadius: 20,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -129,6 +129,6 @@ const styles = StyleSheet.create({
   },
   arrowText: {
     fontSize: 24,
-    color: '#ff6f61',
+    color: '#8A2BE2',
   },
 });

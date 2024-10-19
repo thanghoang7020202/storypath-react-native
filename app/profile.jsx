@@ -70,7 +70,7 @@ export default function Profile({ updateUsername, user, onCloseProfile }) {
 
       {/* Go Back Button - close the modal */}
       <View style={styles.buttonWrapper}>
-        <Button title="Go Back" onPress={onCloseProfile} color="#ff6f61" />
+        <Button title="Go Back" onPress={onCloseProfile} color="#8A2BE2" />
       </View>
     </View>
   );
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   profileHeader: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ff6f61',
+    color: '#8A2BE2',
     marginBottom: 20,
   },
   profileSection: {
