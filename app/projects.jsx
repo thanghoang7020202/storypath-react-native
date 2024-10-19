@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { useGlobalSearchParams, useRouter } from 'expo-router';
-import { getProjects, deleteProject, getProjectParticipantCounts } from "../components/api";
+import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
+import { getProjects, deleteProject, getProjectParticipantCounts, addTracking, getTrackings } from "../components/api";
+import { useUsername } from './usernameContext';
 
 export default function ProjectList() {
   const router = useRouter();
-  const { id } = useGlobalSearchParams();
+  const { username, setUsername } = useUsername();  // Use the context
+  const { id } = useLocalSearchParams();
   const [projectList, setProjectList] = useState([]);
   const [projectParticipantCounts, setProjectParticipantCounts] = useState([]);
   const navigation = useNavigation();
@@ -55,7 +57,7 @@ export default function ProjectList() {
       <TouchableOpacity
         style={styles.arrowButton}
         // go to the projectHomeScreen after clicking the arrow
-        onPress={() => router.push({ pathname: `./ProjectHomeScreen/${item.id}`, params: item })}
+        onPress={() => router.push({ pathname: `./ProjectHomeScreen/${item.id}` })}
         
       >
         <Text style={styles.arrowText}>➔</Text>

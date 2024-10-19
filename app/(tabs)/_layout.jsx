@@ -6,31 +6,31 @@ import { DrawerToggleButton } from '@react-navigation/drawer';
 
 export default function _layout() {
   return (
-   <Tabs screenOptions={{headerLeft: () => <DrawerToggleButton tintColor='#000' />}}>
-    <Tabs.Screen name='blog' options={{
-      tabBarIcon: ({color}) => (
-        <Feather name="list" size={24} color={color} />
-      ),
-      tabBarLabel: 'Blog',
-      headerTitle: 'Blog'
-    }} />
-    <Tabs.Screen name='ProjectHomeScreen/[id]' options={{ 
-      tabBarIcon: ({color}) => (
-        <Feather name="home" size={24} color={color} />
-      ),
-      tabBarLabel: 'ProjectHomeScreen',
-      headerTitle: 'ProjectHomeScreen'
-    }} />
-  
-
-    <Tabs.Screen name='ShowMap' options={{
-      tabBarIcon: ({color}) => (
-        <Feather name="map" size={24} color={color} />
-      ),
-      tabBarLabel: 'Map',
-      headerTitle: 'Map'
-    }} />
+    <Tabs screenOptions={{headerLeft: () => <DrawerToggleButton tintColor='#000' />}}>
+      <Tabs.Screen name='ProjectHomeScreen/[id]' options={{ 
+        tabBarIcon: ({color}) => (
+          <Feather name="home" size={24} color={color} />
+        ),
+        tabBarLabel: 'ProjectHomeScreen',
+        headerTitle: 'ProjectHomeScreen'
+      }} />
     
-   </Tabs>
+
+      <Tabs.Screen name='ShowMap' options={{
+        tabBarIcon: ({color}) => (
+          <Feather name="map" size={24} color={color} />
+        ),
+        tabBarLabel: 'Map',
+        headerTitle: 'Map'
+      }} />
+
+      <Tabs.Screen name='QRCodeScanner' options={{
+        tabBarIcon: ({color}) => (
+          <Feather name="camera" size={24} color={color} />
+        ),
+        tabBarLabel: 'QRCodeScanner',
+        headerTitle: 'QRCodeScanner'
+      }} />
+    </Tabs>
   )
 }

@@ -15,7 +15,7 @@ Authorization: Bearer {{jwtToken}}
 }
 
 ### Get a specific email from the server
-GET {{baseUrl}}/api/project?id=eq.2223
+GET {{baseUrl}}/api/project?id=eq.1
 Authorization: Bearer {{jwtToken}}
 
 {
@@ -43,8 +43,8 @@ POST {{baseUrl}}/api/location
 Authorization : Bearer {{jwtToken}}
 
 {
-    "id": 2033,
-    "project_id": 2223,
+    "id": 5533,
+    "project_id": 2030,
     "location_name": "UQ St Lucia",
     "location_trigger": "UQ St Lucia",
     "username": "s4759487"
@@ -101,7 +101,7 @@ Content-Type: application/json
     "location_id": 5533,
     "points": 10,
     "username": "s4759487",
-    "participant_username": "s4759487-par"
+    "participant_username": "s4759487-par2"
 }
 
 ### get all tracking entries
@@ -115,6 +115,15 @@ Content-Type: application/json
     "username": "s4759487"
 }
 
+### delete a tracking entry
+DELETE {{baseUrl}}/api/tracking?id=eq.686
+Authorization : Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "username": "s4759487"
+}
+
 ### get project participant count
 GET {{baseUrl}}/api/project_participant_counts
 Authorization: Bearer {{jwtToken}}
@@ -122,6 +131,16 @@ Content-Type: application/json
 
 {
     "username": "s4759487"
+}
+
+### add a new project participant count
+POST {{baseUrl}}/api/project_participant_counts
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "project_id": 2030,
+    "number_participants": 100
 }
 
 ### get location participant count

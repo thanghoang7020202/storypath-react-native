@@ -5,11 +5,11 @@ import { useRouter } from 'expo-router';
 import { WebView } from 'react-native-webview';
 import { getProject, getLocations, getProjects } from '../../../components/api';
 import MapView, { Marker } from 'react-native-maps';
-import { useGlobalSearchParams } from 'expo-router';
+import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 
 export default function ProjectHomeScreen({ route }) {
   const router = useRouter();
-  const { id } = useGlobalSearchParams();
+  const { id } = useLocalSearchParams();            // update when in focus
   const [project, setProject] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState('Homescreen');
@@ -22,6 +22,7 @@ export default function ProjectHomeScreen({ route }) {
      */
   useEffect(() => {
     const fetchProjectAndLocations = async () => {
+      try {
         const projectData = await getProject(id);
         let locationsData = await getLocations();
         
@@ -35,6 +36,9 @@ export default function ProjectHomeScreen({ route }) {
             totalPoints += location.score_points;
         });
         setTotalPoints(totalPoints);
+      } catch (error) {
+        console.warn('Error fetching project and locations at projectHomeScreen:', error);
+      }
     };
     fetchProjectAndLocations();
 }, [id]);
@@ -122,10 +126,20 @@ export default function ProjectHomeScreen({ route }) {
         <Text>{locations.find(loc => loc.location_name === selectedLocation)?.clue}</Text>
 
         <Text style={styles.sectionTitle}>Location Content</Text>
-        <WebView
+        {
+          (locations.find(loc => loc.location_name === selectedLocation)?.location_content) ? (
+            <WebView
+              source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
+              style={styles.webview}
+            />
+          ) : (
+            <Text>No content available for this location</Text>
+          )
+        }
+        {/* <WebView
           source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
           style={styles.webview}
-        />
+        /> */}
       </View>
     )}
 
@@ -133,6 +147,11 @@ export default function ProjectHomeScreen({ route }) {
     <View style={styles.footerContainer}>
       <Button title={`Points: ${points} / ${totalPoints}`} onPress={() => {}} color="#8A2BE2" />
       <Button title={`Locations Visited: ${locationsVisited.length} / ${locations.length}`} onPress={() => {}} color="#8A2BE2" />
+    </View>
+
+    <View style={styles.backButton}>
+    {/* Back Button */}
+    <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
     </View>
   </ScrollView>
 );
@@ -176,5 +195,9 @@ export default function ProjectHomeScreen({ route }) {
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginTop: 20,
+    },
+    backButton: {
+      marginVertical: 20,
+      flex: 1,
     },
   });

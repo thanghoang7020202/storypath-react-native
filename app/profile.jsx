@@ -5,7 +5,7 @@ import ImagePickerScreen from '../components/imagePicker'; // Import the ImagePi
 import EditProfile from '../components/edit-profile'; // Import the EditProfile component
 import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
 
-export default function Profile() {//{ updateUsername, user, onCloseProfile }) {
+export default function Profile() {
   const router = useRouter(); // Get the router object
   const [profileImage, setProfileImage] = useState(null); // State to hold the selected profile image
   const { username, setUsername } = useUsername(); // Use the context
