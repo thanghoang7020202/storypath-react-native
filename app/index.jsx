@@ -1,18 +1,20 @@
 import { View, Text, Button, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import React, { useState } from 'react';
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 
-import { useUsername } from './usernameContext';  // Use the context
+import { useUsername, UsernameProvider } from './usernameContext';  // Use the context
 import Profile from './profile'; // Import the Profile component
 
 export default function Index() {
 
-  const [user, setUser] = useState('participant_username'); // Default username state
+  const router = useRouter(); // Get the router object
+  //const [user, setUser] = useState('participant_username'); // Default username state
+  const { username, setUsername } = useUsername(); // Use the context
   const [isProfileVisible, setProfileVisible] = useState(false); // State to control modal visibility
 
   // Function to handle the username change
   function handleUsernameChange(username) {
-    setUser(username);
+    setUsername(username); // Update the username
   }
 
   function toggleProfile() {
@@ -27,20 +29,24 @@ export default function Index() {
           With StoryPath, you can discover and create amazing location-based adventures. From city
           tours to treasure hunts, the possibilities are endless!
         </Text>
-        <TouchableOpacity style={styles.button} onPress={toggleProfile}>
-          {/* <Profile style={styles.buttonText} updateUsername={handleUsernameChange} user={user} /> 
-          click the button to go to the Profile screen with parameters same as above*/}
-          <Modal style={styles.button} visible={isProfileVisible} animationType="slide" onRequestClose={toggleProfile}>
-            <Profile updateUsername={handleUsernameChange} user={user} onCloseProfile={toggleProfile} />
-          </Modal>
-          <TouchableOpacity onPress={toggleProfile}>
-            <Text style={styles.buttonText}>Edit Profile</Text>
-          </TouchableOpacity>
 
+        <TouchableOpacity style={styles.button} onPress={ () => router.push( { pathname: '/profile'} ) }>
+          <Text style={styles.buttonText}>Create Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
+
+        <TouchableOpacity style={styles.button} onPress={() => router.push('/projects')}>
           <Text style={styles.buttonText}>Explore Projects</Text>
         </TouchableOpacity>
+
+          {/* <Profile style={styles.buttonText} updateUsername={handleUsernameChange} user={user} /> 
+          click the button to go to the Profile screen with parameters same as above*/}
+          {/* <Modal style={styles.button} visible={isProfileVisible} animationType="slide" onRequestClose={toggleProfile}>
+            <Profile updateUsername={handleUsernameChange} user={user} onCloseProfile={toggleProfile} />
+          </Modal> */}
+          
+          {/* <TouchableOpacity onPress={toggleProfile}>
+            <Text style={styles.buttonText}>Create Profile</Text>
+          </TouchableOpacity> */}        
     </View>
   );
 }
@@ -79,8 +85,11 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#555',
     marginBottom: 20,
-    flexWrap: 'wrap',
-  },
+    textAlign: 'center', // Keeps the text centered
+    width: '100%',       // Ensures the text spans the full width of the container
+    flexWrap: 'wrap',    // Enables wrapping to a new line
+    alignSelf: 'center', // Ensures that the element is centered inside any flex container
+  },  
   description: {
     fontSize: 14,
     color: '#777',

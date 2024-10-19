@@ -38,7 +38,7 @@ const apiRequest = async (endpoint, method = 'GET', body = null) => {
 export const getProjects = async () => {
     try {
         const data = await apiRequest('/project');
-        console.log('Projects:', data);
+        //console.log('Projects:', data);
         return data; // Return data if needed in the calling component
     } catch (error) {
         console.error('Error fetching projects:', error);
@@ -49,7 +49,7 @@ export const getProjects = async () => {
 export const getProject = async (projectId) => {
     try {
         const data = await apiRequest(`/project?id=eq.${projectId}`);
-        console.log('Project:', data);
+        //console.log('Project:', data);
         return data; // Return the project if needed
     } catch (error) {
         console.error('Error fetching project:', error);
@@ -78,7 +78,7 @@ export const updateProject = async (projectId, updatedData) => {
 export const deleteProject = async (projectId) => {
     try {
         await apiRequest(`/project?id=eq.${projectId}`, 'DELETE');
-        console.log(`Project ${projectId} deleted`);
+        //console.log(`Project ${projectId} deleted`);
     } catch (error) {
         console.error(`Error deleting project ${projectId}:`, error);
     }
@@ -88,7 +88,7 @@ export const deleteProject = async (projectId) => {
 export const getLocations = async () => {
     try {
         const data = await apiRequest('/location');
-        console.log('Locations:', data);
+        //console.log('Locations:', data);
         return data; // Return locations if needed
     } catch (error) {
         console.error('Error fetching locations:', error);
@@ -99,7 +99,7 @@ export const getLocations = async () => {
 export const getLocation = async (locationId) => {
     try {
         const data = await apiRequest(`/location?id=eq.${locationId}`);
-        console.log('Location:', data);
+        //console.log('Location:', data);
         return data; // Return the location if needed
     } catch (error) {
         console.error('Error fetching location:', error);
@@ -128,7 +128,7 @@ export const updateLocation = async (locationId, updatedData) => {
 export const deleteLocation = async (locationId) => {
     try {
         await apiRequest(`/location?id=eq.${locationId}`, 'DELETE');
-        console.log(`Location ${locationId} deleted`);
+        //console.log(`Location ${locationId} deleted`);
     } catch (error) {
         console.error(`Error deleting location ${locationId}:`, error);
     }

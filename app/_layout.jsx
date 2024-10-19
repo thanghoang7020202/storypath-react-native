@@ -3,22 +3,18 @@ import { View, Text, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { Drawer } from 'expo-router/drawer';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { Feather, MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { router, usePathname } from 'expo-router';
+import { useRouter, usePathname, } from 'expo-router';
 import { profile } from './profile';
 
 import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
 
 // Custom Drawer Content Component
-const CustomDrawerContent = (props) => {
+const CustomDrawerContent = (props) => { // props is the username
   const pathname = usePathname();
+  const router = useRouter();
 
-  // const [username, setUsername] = useState('participant_username');
-
-  // function updateUsername(name) {
-  //   setUsername(name);
-  // }
   // Get the username and updateUsername function passed from Layout
-  const { username } = props;
+  const {username, setUsername} = useUsername();
 
   useEffect(() => {
     console.log('Current Path', pathname);
@@ -65,16 +61,6 @@ const CustomDrawerContent = (props) => {
 
       <DrawerItem
         icon={({ color, size }) => (
-          <Feather name="map" size={size} color={pathname === '/ShowMap' ? '#fff' : '#000'} />
-        )}
-        label={'ShowMap'}
-        labelStyle={[styles.navItemLabel, { color: pathname === '/ShowMap' ? '#fff' : '#000' }]}
-        style={{ backgroundColor: pathname === '/ShowMap' ? '#8A2BE2' : '#fff' }}
-        onPress={() => router.push('/ShowMap')}
-      />
-
-      <DrawerItem
-        icon={({ color, size }) => (
           <Feather name="info" size={size} color={pathname === '/about' ? '#fff' : '#000'} />
         )}
         label={'About'}
@@ -90,13 +76,11 @@ const CustomDrawerContent = (props) => {
 
 // Main Layout with Drawer
 export default function Layout() {
-  const [username, setUsername] = useState('participant_username');
 
-  // Function to update the username
-  function updateUsername(newUsername) {
-    setUsername(newUsername);
-  }
+  //const [username, setUsername] = useState('participant_username');
+  const { username, setUsername } = useUsername(); // Use the context
 
+  setUsername('participant_1');
   return (
     <UsernameProvider>
       <Drawer

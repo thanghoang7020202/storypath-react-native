@@ -3,11 +3,12 @@ import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
 import ImagePickerScreen from '../components/imagePicker'; // Import the ImagePicker component
 import EditProfile from '../components/edit-profile'; // Import the EditProfile component
+import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
 
-export default function Profile({ updateUsername, user, onCloseProfile }) {
+export default function Profile() {//{ updateUsername, user, onCloseProfile }) {
   const router = useRouter(); // Get the router object
   const [profileImage, setProfileImage] = useState(null); // State to hold the selected profile image
-  const [profileUsername, setProfileUsername] = useState(user); // State to hold the profile username
+  const { username, setUsername } = useUsername(); // Use the context
   const [isPickerVisible, setPickerVisible] = useState(false); // State to control modal visibility
   const [isUserEditing, setUserEditing] = useState(false); // State to control edit mode
 
@@ -22,7 +23,7 @@ export default function Profile({ updateUsername, user, onCloseProfile }) {
   }
 
   function handleUsernameChange(username) {
-    setProfileUsername(username);
+    setUsername(username);
   }
 
   function toggleUserEditing() {
@@ -56,8 +57,8 @@ export default function Profile({ updateUsername, user, onCloseProfile }) {
       <View style={styles.inputWrapper}>
         <TouchableOpacity onPress={toggleUserEditing}>
           {/* Display the profile username */}
-          {profileUsername ? (
-            <Text style={styles.inputText}>{profileUsername}</Text>
+          {username ? (
+            <Text style={styles.inputText}>{username}</Text>
           ) : (
             <Text style={styles.inputText}>Add Username</Text>
           )}
@@ -65,12 +66,12 @@ export default function Profile({ updateUsername, user, onCloseProfile }) {
       </View>
 
       <Modal visible={isUserEditing} animationType="slide" onRequestClose={toggleUserEditing}>
-        <EditProfile username={profileUsername} onUsernameChange={handleUsernameChange} onCloseEditProfile={toggleUserEditing} />
+        <EditProfile username={username} onUsernameChange={handleUsernameChange} onCloseEditProfile={toggleUserEditing} />
       </Modal> 
 
       {/* Go Back Button - close the modal */}
       <View style={styles.buttonWrapper}>
-        <Button title="Go Back" onPress={onCloseProfile} color="#8A2BE2" />
+        <Button title="Go Back" onPress={() => router.back()} color={'#8A2BE2'} />
       </View>
     </View>
   );
