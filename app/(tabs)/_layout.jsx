@@ -14,7 +14,7 @@ export default function _layout() {
       tabBarLabel: 'Blog',
       headerTitle: 'Blog'
     }} />
-    <Tabs.Screen name='ProjectHomeScreen' options={{
+    <Tabs.Screen name='ProjectHomeScreen/[id]' options={{ 
       tabBarIcon: ({color}) => (
         <Feather name="home" size={24} color={color} />
       ),
