@@ -31,7 +31,7 @@ Authorization: Bearer {{jwtToken}}
 }
 
 ### get all locations for 1 project
-GET {{baseUrl}}/api/location?project_id=eq.2223
+GET {{baseUrl}}/api/location?project_id=eq.13135
 Authorization: Bearer {{jwtToken}}
 
 {
@@ -55,6 +55,17 @@ DELETE {{baseUrl}}/api/location?id=eq.2033
 Authorization: Bearer {{jwtToken}}
 
 {
+    "username": "s4759487"
+}
+
+### Update a location
+PATCH {{baseUrl}}/api/location?id=eq.5533
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "location_name": "UQ St Lucia",
+    "location_trigger": "UQ St Lucia",
     "username": "s4759487"
 }
 

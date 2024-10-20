@@ -3,19 +3,26 @@ import {Picker} from '@react-native-picker/picker';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
 import { WebView } from 'react-native-webview';
-import { getProject, getLocations, getProjects } from '../../../components/api';
+import { getProject, getLocations, getProjects, getTrackings, addTracking } from '../../../components/api';
 import MapView, { Marker } from 'react-native-maps';
 import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
+import { useUsername } from '../../usernameContext';
+import { useProjectId } from '../../projectIdContext';
 
 export default function ProjectHomeScreen({ route }) {
   const router = useRouter();
-  const { id } = useLocalSearchParams();            // update when in focus
+
+  const { username, setUsername } = useUsername();  // Use the context (setUsername is not used in this component)
+  const { projectId, setProjectId } = useProjectId(); // Use the context
+  const { id } = useLocalSearchParams();            // projectId, update when in focus
+  
   const [project, setProject] = useState(null);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState('Homescreen');
   const [points, setPoints] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
   const [locationsVisited, setLocationsVisited] = useState([]);
+  const [userTrackings, setUserTrackings] = useState([]);
 
   /**
      * Fetch the project and locations when the component mounts.
@@ -23,16 +30,24 @@ export default function ProjectHomeScreen({ route }) {
   useEffect(() => {
     const fetchProjectAndLocations = async () => {
       try {
+        console.log('projectHomeScreen id:', id);
         const projectData = await getProject(id);
-        let locationsData = await getLocations();
+        const locationsData = await getLocations();
+        const trackingsData = await getTrackings();
         
-        locationsData = locationsData.filter((location) => location.project_id === projectData[0].id);
+        // Filter locations by project id
+        const filteredLocationsData = locationsData.filter((location) => location.project_id === projectData[0].id);
+        // Filter trackings by project id and username
+        const filteredTrackingsData = trackingsData.filter((tracking) => tracking.project_id === projectData[0].id && tracking.participant_username === username);
+
         setProject(projectData[0]); // Assuming projectData is an array
-        setLocations(locationsData);
+        setProjectId(projectData[0].id);
+        setLocations(filteredLocationsData);
+        setUserTrackings(filteredTrackingsData);
 
         // Calculate total points
         let totalPoints = 0;
-        locationsData.forEach(location => {
+        filteredLocationsData.forEach(location => {
             totalPoints += location.score_points;
         });
         setTotalPoints(totalPoints);
@@ -71,29 +86,29 @@ export default function ProjectHomeScreen({ route }) {
     }
   };
 
-  /**
-   * Fit the map bounds to the markers.
-   * @param {Object} locations - The locations array
-   * @returns {null} - Returns null
-   */
-  const FitMapBounds = ({ locations }) => {
-    const map = useMap(); // Get the map instance
+  // /**
+  //  * Fit the map bounds to the markers.
+  //  * @param {Object} locations - The locations array
+  //  * @returns {null} - Returns null
+  //  */
+  // const FitMapBounds = ({ locations }) => {
+  //   const map = useMap(); // Get the map instance
 
-    useEffect(() => {
-        if (locations.length > 0) {
-            const bounds = locations.map(location => {
-                const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
-                return [latitude, longitude];
-            });
-            map.fitBounds(bounds); // Automatically fit bounds to markers
-        }
-    }, [locations, map]);
+  //   useEffect(() => {
+  //       if (locations.length > 0) {
+  //           const bounds = locations.map(location => {
+  //               const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
+  //               return [latitude, longitude];
+  //           });
+  //           map.fitBounds(bounds); // Automatically fit bounds to markers
+  //       }
+  //   }, [locations, map]);
 
-    return null;
-  };
+  //   return null;
+  // };
 
   if (!project || locations.length === 0) {
-    return <Text>Loading...</Text>;
+    return <Text>No location found. Keep loading...</Text>;
 }
 
 

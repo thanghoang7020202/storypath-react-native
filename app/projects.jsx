@@ -54,11 +54,13 @@ export default function ProjectList() {
             {projectParticipantCounts.find((count) => count.project_id === item.id)?.number_participants || 0}</Text>
         </View>
       </View>
+
       <TouchableOpacity
         style={styles.arrowButton}
         // go to the projectHomeScreen after clicking the arrow
-        onPress={() => router.push({ pathname: `./ProjectHomeScreen/${item.id}` })}
-        
+        onPress={() => {
+          router.push({ pathname: `./ProjectHomeScreen/${item.id}` });
+        }}
       >
         <Text style={styles.arrowText}>➔</Text>
       </TouchableOpacity>
