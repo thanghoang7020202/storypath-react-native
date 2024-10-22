@@ -33,7 +33,7 @@ export default function ProjectHomeScreen({ route }) {
         setUsername(usernameFromRoute);
         Alert.alert(
           "🎉✨ Welcome, Superstar! ✨🎉", 
-          `Hey ${username}! \n\nLove to see you here! Let's get started! 🚀🚀🚀`
+          `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
         );
         console.log('projectHomeScreen id:', id);
         const projectData = await getProject(id);
@@ -62,6 +62,23 @@ export default function ProjectHomeScreen({ route }) {
     fetchProjectAndLocations();
 }, [id]);
 
+  // using the useEffect hook to update thr points and locations visited count from trackings
+  useEffect(() => {
+    const updatePointsAndLocationsVisited = () => {
+        let points = 0;
+        const locationsVisited = new Set();
+        userTrackings.forEach(tracking => {
+            const location = locations.find((loc) => loc.id === tracking.location_id);
+            points += location.score_points;
+            locationsVisited.add(location.location_name);
+        });
+        setPoints(points);
+        setLocationsVisited(Array.from(locationsVisited));
+    };
+    updatePointsAndLocationsVisited();
+  }, [userTrackings, locations]);
+
+
   /**
      * Handle the location change event.
      * @param {Object} event - The event object
@@ -82,11 +99,19 @@ export default function ProjectHomeScreen({ route }) {
             }
             return points;
         };
+        // alert if the selected location is already visited
+        if (locationsVisited.includes(location.location_name)) {
+            Alert.alert(
+                'Location Already Visited',
+                'You have already visited this location. Please select another location.',
+                [{ text: 'OK' }]
+            );
+        }
         setPoints(pointCompute());
         setLocationsVisited(Array.from(newLocationsVisited));
     } else {
-        setPoints(0);
-        setLocationsVisited([]);
+        //setPoints(0);
+        //setLocationsVisited([]);
     }
   };
 
