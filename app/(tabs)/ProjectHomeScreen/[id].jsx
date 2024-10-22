@@ -11,10 +11,10 @@ import { useProjectId } from '../../projectIdContext';
 
 export default function ProjectHomeScreen({ route }) {
   const router = useRouter();
+  const { id, username: usernameFromRoute } = useLocalSearchParams();            // projectId, update when in focus
 
   const { username, setUsername } = useUsername();  // Use the context (setUsername is not used in this component)
   const { projectId, setProjectId } = useProjectId(); // Use the context
-  const { id } = useLocalSearchParams();            // projectId, update when in focus
   
   const [project, setProject] = useState(null);
   const [locations, setLocations] = useState([]);
@@ -30,6 +30,11 @@ export default function ProjectHomeScreen({ route }) {
   useEffect(() => {
     const fetchProjectAndLocations = async () => {
       try {
+        setUsername(usernameFromRoute);
+        Alert.alert(
+          "🎉✨ Welcome, Superstar! ✨🎉", 
+          `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
+        );
         console.log('projectHomeScreen id:', id);
         const projectData = await getProject(id);
         const locationsData = await getLocations();
@@ -39,7 +44,6 @@ export default function ProjectHomeScreen({ route }) {
         const filteredLocationsData = locationsData.filter((location) => location.project_id === projectData[0].id);
         // Filter trackings by project id and username
         const filteredTrackingsData = trackingsData.filter((tracking) => tracking.project_id === projectData[0].id && tracking.participant_username === username);
-
         setProject(projectData[0]); // Assuming projectData is an array
         setProjectId(projectData[0].id);
         setLocations(filteredLocationsData);
@@ -57,6 +61,23 @@ export default function ProjectHomeScreen({ route }) {
     };
     fetchProjectAndLocations();
 }, [id]);
+
+  // using the useEffect hook to update thr points and locations visited count from trackings
+  useEffect(() => {
+    const updatePointsAndLocationsVisited = () => {
+        let points = 0;
+        const locationsVisited = new Set();
+        userTrackings.forEach(tracking => {
+            const location = locations.find((loc) => loc.id === tracking.location_id);
+            points += location.score_points;
+            locationsVisited.add(location.location_name);
+        });
+        setPoints(points);
+        setLocationsVisited(Array.from(locationsVisited));
+    };
+    updatePointsAndLocationsVisited();
+  }, [userTrackings, locations]);
+
 
   /**
      * Handle the location change event.
@@ -78,11 +99,19 @@ export default function ProjectHomeScreen({ route }) {
             }
             return points;
         };
+        // alert if the selected location is already visited
+        if (locationsVisited.includes(location.location_name)) {
+            Alert.alert(
+                'Location Already Visited',
+                'You have already visited this location. Please select another location.',
+                [{ text: 'OK' }]
+            );
+        }
         setPoints(pointCompute());
         setLocationsVisited(Array.from(newLocationsVisited));
     } else {
-        setPoints(0);
-        setLocationsVisited([]);
+        //setPoints(0);
+        //setLocationsVisited([]);
     }
   };
 

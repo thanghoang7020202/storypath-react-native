@@ -10,7 +10,7 @@ export default function _layout() {
   return (
     <ProjectIdProvider>
       <Tabs screenOptions={{headerLeft: () => <DrawerToggleButton tintColor='#000' />}}>
-        <Tabs.Screen name='ProjectHomeScreen/[id]' options={{ 
+        <Tabs.Screen name='ProjectHomeScreen/[id]' options={{
           tabBarIcon: ({color}) => (
             <Feather name="home" size={24} color={color} />
           ),
