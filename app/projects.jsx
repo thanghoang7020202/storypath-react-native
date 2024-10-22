@@ -59,7 +59,7 @@ export default function ProjectList() {
         style={styles.arrowButton}
         // go to the projectHomeScreen after clicking the arrow
         onPress={() => {
-          router.push({ pathname: `./ProjectHomeScreen/${item.id}` });
+          router.push({ pathname: `./ProjectHomeScreen/${item.id}?username=${username}` });
         }}
       >
         <Text style={styles.arrowText}>➔</Text>
