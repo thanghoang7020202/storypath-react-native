@@ -4,11 +4,13 @@ import { Tabs, router } from 'expo-router'
 import { Feather } from '@expo/vector-icons';
 import { DrawerToggleButton } from '@react-navigation/drawer';
 import { ProjectIdProvider, useProjectId } from '.././projectIdContext'; // Use the context
+import { UsernameProvider, useUsername } from '../usernameContext';
 
 export default function _layout() {
 
   return (
     <ProjectIdProvider>
+      <UsernameProvider>
       <Tabs screenOptions={{headerLeft: () => <DrawerToggleButton tintColor='#000' />}}>
         <Tabs.Screen name='ProjectHomeScreen/[id]' options={{
           tabBarIcon: ({color}) => (
@@ -35,6 +37,7 @@ export default function _layout() {
           headerTitle: 'QRCodeScanner'
         }} />
       </Tabs>
+      </UsernameProvider>
     </ProjectIdProvider>
   )
 }

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Appearance, View, SafeAreaView, Text } from "react-native";
+import { StyleSheet, Appearance, View, SafeAreaView, Text, Alert } from "react-native";
 import MapView, { Circle } from "react-native-maps";
 import * as Location from 'expo-location';
 import { getDistance } from "geolib";
 //import { locations } from "../data/locations";
 import { useProjectId } from ".././projectIdContext";
-import { getProject, getTracking, addTracking, getLocations } from "../../components/api";
+import { getProject, getTrackings, addTracking, getLocations } from "../../components/api";
 
 // Define Stylesheet
 const styles = StyleSheet.create({
@@ -47,6 +47,16 @@ function NearbyLocation(props) {
                 </View>
             </SafeAreaView>
         );
+    } else {
+        return (
+            <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
+                <View style={styles.nearbyLocationView}>
+                    <Text style={styles.nearbyLocationText}>
+                        No nearby location
+                    </Text>
+                </View>
+            </SafeAreaView>
+        );
     }
 }
 
@@ -54,53 +64,79 @@ export default function ShowMap() {
 
     const [locations, setLocations] = useState([]);
     const {projectId, setProjectId } = useProjectId();
+    const [trackings, setTrackings] = useState([]);
+    const [isWithin100m, setIsWithin100m] = useState(false);
+    const [nearestLocation, setNearestLocation] = useState(null); // new
+
+    // update trackings
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const trackingData = await getTrackings();
+                const data = trackingData.filter(tracking => tracking.project_id == projectId);
+                console.log("trackings", data);
+                setTrackings(data);
+            } catch (error) {
+                console.error('Error fetching trackings in ShowMap:', error);
+            }
+        }
+        fetchData();
+    }, [projectId, isWithin100m]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-              const locationData = await getLocations();
-              for (let i = 0; i < locationData.length; i++) {
-                  console.log("locationData", locationData[i].project_id);
-              }
-              // filter by project id
-              const data = locationData.filter(location => location.project_id == projectId);
-              console.log("data", data.map(location => location.location_trigger));
-              // convert to object-based latlong
-              // format: {"id":"12","location":"Mount Gravatt Tafe","latlong":"-27.526065, 153.0909823"}
-              const updatedLocations = data.map(location => {
-                if (location.location_trigger == "Location Entry" || location.location_trigger == "Both Location Entry and QR Code Scan") {
-                  const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
-                  return {
-                      id: location.id,
-                      location: location.location_name,
-                      latlong: latitude + ", " + longitude,
-                      coordinates: {
-                          latitude: latitude,
-                          longitude: longitude
-                      }
-                  };
-                  // ignore locations that are not for location entry
-                }
-                return {
-                  id: null,
-                  location: null,
-                  latlong: null,
-                  coordinates: null
-                }
-              });
-
-              console.log("updatedLocations", updatedLocations);
-              // remove null items
-              const filteredLocations = updatedLocations.filter(location => location.id != null);
-              
-              setLocations(filteredLocations);
+                const locationData = await getLocations();
+                const data = locationData.filter(location => location.project_id == projectId);
+                const updatedLocations = data.map(location => {
+                    if (location.location_trigger === "Location Entry" || location.location_trigger === "Both Location Entry and QR Code Scan") {
+                        const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
+                        return {
+                            id: location.id,
+                            location: location.location_name,
+                            score_points: location.score_points,
+                            coordinates: { latitude, longitude }
+                        };
+                    }
+                    return null;
+                }).filter(Boolean);
+                
+                setLocations(updatedLocations);
+                console.log("locations", updatedLocations);
             } catch (error) {
                 console.error('Error fetching locations in ShowMap:', error);
             }
-        }
+        };
         fetchData();
-    }
-    , [projectId]);
+    }, [projectId]);
+
+    // add a new tracking entry if user is within 100m of a location entry point and has not visited the location before (not in trackings)
+    useEffect(() => {
+        const addTrackingEntry = async () => {
+            if (isWithin100m && nearestLocation && !trackings.some(tracking => tracking.location_id === nearestLocation.id)) {
+                const newTracking = {
+                    project_id: projectId,
+                    location_id: nearestLocation.id,
+                    points: nearestLocation.score_points,
+                    username: "s4759487", // fixed username for now
+                    participant_username: "testuser",
+                };
+                try {
+                    await addTracking(newTracking);
+                    setTrackings(prevTrackings => [...prevTrackings, newTracking]);
+                    console.log('Tracking added:', newTracking);
+                } catch (error) {
+                    console.error('Error adding tracking in ShowMap:', error);
+                }
+            } else {
+                Alert.alert(
+                    "Visit Location Alert",
+                    "You are not within 100m of a location entry point or you have already visited this location!"
+                );
+            }
+        };
+        addTrackingEntry();
+    }, [isWithin100m, nearestLocation, trackings]);
 
     // Setup state for map data
     const initialMapState = {
@@ -165,6 +201,8 @@ export default function ShowMap() {
                             longitude: location.coords.longitude
                         };
                         const nearbyLocation = calculateDistance(userLocation);
+                        setNearestLocation(nearbyLocation);
+                        setIsWithin100m(nearbyLocation?.distance.nearby || false);
                         setMapState(prevState => ({
                             ...prevState,
                             userLocation,
