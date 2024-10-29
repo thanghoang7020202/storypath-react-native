@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Appearance, View, SafeAreaView, Text, Alert } from "react-native";
 import MapView, { Circle } from "react-native-maps";
+import { useIsFocused } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { getDistance } from "geolib";
 //import { locations } from "../data/locations";
@@ -63,6 +64,7 @@ function NearbyLocation(props) {
 
 export default function ShowMap() {
 
+    const isFocused = useIsFocused();
     const [locations, setLocations] = useState([]);
     const {projectId, setProjectId } = useProjectId();
     const {username, setUsername } = useUsername();
@@ -83,7 +85,7 @@ export default function ShowMap() {
             }
         }
         fetchData();
-    }, [projectId, isWithin100m, nearestLocation]);
+    }, [projectId, isWithin100m, nearestLocation, isFocused]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -115,7 +117,8 @@ export default function ShowMap() {
     // add a new tracking entry if user is within 100m of a location entry point and has not visited the location before (not in trackings)
     useEffect(() => {
         const addTrackingEntry = async () => {
-            if (isWithin100m && nearestLocation != null
+            // Check if nearestLocation exists and is within 100m
+            if (isWithin100m && nearestLocation
                 && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)) {
                 const newTracking = {
                     project_id: projectId,
@@ -136,15 +139,12 @@ export default function ShowMap() {
                     console.error('Error adding tracking in ShowMap:', error);
                 }
             } else {
-                // Alert.alert(
-                //     "Visit Location Alert",
-                //     "You are not within 100m of a location entry point or you have already visited this location! Keep exploring! 🚀",
-                // );
-                console.log(isWithin100m, nearestLocation, !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username));
+                console.log(isWithin100m, nearestLocation, trackings.some(tracking => tracking.location_id === nearestLocation?.id && tracking.participant_username === username));
             }
         };
         addTrackingEntry();
     }, [isWithin100m, nearestLocation, trackings, username]);
+    
 
     // Setup state for map data
     const initialMapState = {

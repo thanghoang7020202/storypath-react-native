@@ -1,4 +1,5 @@
 import { View, Text, Button,  StyleSheet, ScrollView, Alert } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import {Picker} from '@react-native-picker/picker';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'expo-router';
@@ -10,6 +11,7 @@ import { useUsername } from '../../usernameContext';
 import { useProjectId } from '../../projectIdContext';
 
 export default function ProjectHomeScreen({ route }) {
+  const isFocused = useIsFocused();
   const router = useRouter();
   const { id, username: usernameFromRoute } = useLocalSearchParams();            // projectId, update when in focus
 
@@ -24,6 +26,16 @@ export default function ProjectHomeScreen({ route }) {
   const [locationsVisited, setLocationsVisited] = useState([]);
   const [userTrackings, setUserTrackings] = useState([]);
 
+  useEffect(() => {
+    const wellcomeMessage = async () => {
+      Alert.alert(
+        "🎉✨ Welcome, Superstar! ✨🎉", 
+        `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
+      );
+    }
+    wellcomeMessage();
+  }, [username]);
+
   /**
      * Fetch the project and locations when the component mounts.
      */
@@ -31,10 +43,6 @@ export default function ProjectHomeScreen({ route }) {
     const fetchProjectAndLocations = async () => {
       try {
         setUsername(usernameFromRoute);
-        Alert.alert(
-          "🎉✨ Welcome, Superstar! ✨🎉", 
-          `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
-        );
         console.log('projectHomeScreen id:', id);
         const projectData = await getProject(id);
         const locationsData = await getLocations();
@@ -60,7 +68,7 @@ export default function ProjectHomeScreen({ route }) {
       }
     };
     fetchProjectAndLocations();
-}, [id]);
+}, [id, isFocused]);
 
   // using the useEffect hook to update thr points and locations visited count from trackings
   useEffect(() => {
@@ -76,7 +84,7 @@ export default function ProjectHomeScreen({ route }) {
         setLocationsVisited(Array.from(locationsVisited));
     };
     updatePointsAndLocationsVisited();
-  }, [userTrackings, locations]);
+  }, [userTrackings, locations, isFocused]);
 
 
   /**

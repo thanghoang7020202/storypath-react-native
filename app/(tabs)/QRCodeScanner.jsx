@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useProjectId } from ".././projectIdContext";
@@ -7,6 +8,7 @@ import { useUsername } from "../usernameContext";
 import { getTrackings, addTracking, getLocations } from "../../components/api";
 
 export default function QRCodeScanner() {
+  const isFocused = useIsFocused();
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState('');
   const [fireworkVisible, setFireworkVisible] = useState(false);
@@ -33,7 +35,7 @@ export default function QRCodeScanner() {
       }
     };
     fetchData();
-  }, [projectId]);
+  }, [projectId, isFocused]);
 
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
@@ -41,6 +43,14 @@ export default function QRCodeScanner() {
 
     // Check if the scanned data matches any location name and hasn't been tracked
     const matchingLocation = locations.find(location => location.location_name.trim() === data.trim());
+    // check if matched location has location_trigger is ""Both Location Entry and QR Code Scan" or "QR Code Scan"
+    if (matchingLocation.location_trigger !== "Both Location Entry and QR Code Scan" && matchingLocation.location_trigger !== "QR Code Scan") {
+      Alert.alert('QR Code', 'This location requires a physical visit!', [
+        { text: 'Try Again', onPress: () => setScanned(false) },
+      ]);
+      return;
+    }
+
     const alreadyTracked = matchingLocation && trackings.some(tracking => tracking.location_id === matchingLocation.id && tracking.participant_username === username);
 
     if (matchingLocation && !alreadyTracked) {
