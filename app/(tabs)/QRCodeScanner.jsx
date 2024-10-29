@@ -1,100 +1,101 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, Text, View, Button, Alert } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import ConfettiCannon from 'react-native-confetti-cannon';
+import { useProjectId } from ".././projectIdContext";
+import { useUsername } from "../usernameContext";
+import { getTrackings, addTracking, getLocations } from "../../components/api";
 
 export default function QRCodeScanner() {
   const [scanned, setScanned] = useState(false);
   const [scannedData, setScannedData] = useState('');
   const [fireworkVisible, setFireworkVisible] = useState(false);
+  const [locations, setLocations] = useState([]);
+  const [trackings, setTrackings] = useState([]);
   const fireworkRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
+  const { projectId } = useProjectId();
+  const { username } = useUsername();
 
-  if (!permission) {
-    // Camera permissions are still loading
-    return <View style={styles.container}><Text>Requesting permissions...</Text></View>;
-  }
+  useEffect(() => {
+    // Fetch locations and trackings when component mounts
+    const fetchData = async () => {
+      try {
+        const locationData = await getLocations();
+        const projectLocations = locationData.filter(location => location.project_id === projectId);
+        setLocations(projectLocations);
 
+        const trackingData = await getTrackings();
+        const projectTrackings = trackingData.filter(tracking => tracking.project_id === projectId);
+        setTrackings(projectTrackings);
+      } catch (error) {
+        console.error('Error fetching data in QRCodeScanner:', error);
+      }
+    };
+    fetchData();
+  }, [projectId]);
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    setScannedData(data);
+
+    // Check if the scanned data matches any location name and hasn't been tracked
+    const matchingLocation = locations.find(location => location.location_name.trim() === data.trim());
+    const alreadyTracked = matchingLocation && trackings.some(tracking => tracking.location_id === matchingLocation.id && tracking.participant_username === username);
+
+    if (matchingLocation && !alreadyTracked) {
+      addTrackingEntry(matchingLocation);
+      triggerFirework();
+    } else {
+      Alert.alert('QR Code', alreadyTracked ? 'Location already visited!' : 'Location not found!', [
+        { text: 'Try Again', onPress: () => setScanned(false) },
+      ]);
+    }
+  };
+
+  const addTrackingEntry = async (location) => {
+    const newTracking = {
+      project_id: projectId,
+      location_id: location.id,
+      points: location.score_points,
+      username: "s4759487",
+      participant_username: username,
+    };
+    try {
+      await addTracking(newTracking);
+      setTrackings(prev => [...prev, newTracking]);
+      Alert.alert('Location Visited', 'Tracking updated successfully!', [{ text: 'OK' }]);
+    } catch (error) {
+      console.error('Error adding tracking entry:', error);
+    }
+  };
+
+  const triggerFirework = () => {
+    setFireworkVisible(true);
+    setTimeout(() => setFireworkVisible(false), 3000);
+  };
+
+  if (!permission) return <Text>Requesting camera permissions...</Text>;
   if (!permission.granted) {
-    // Camera permissions are not granted yet
     return (
       <View style={styles.permissionContainer}>
-        <Text style={styles.permissionMessage}>We need your permission to show the camera</Text>
+        <Text>We need your permission to show the camera</Text>
         <Button onPress={requestPermission} title="Grant permission" color="#8A2BE2" />
       </View>
     );
   }
 
-  const handleBarCodeScanned = ({ type, data }) => {
-    setScanned(true);
-    setScannedData(data);
-    setFireworkVisible(false);  // Reset firework visibility before showing it again
-
-    // Alert the scanned data with 2 buttons: Continue and Try Again
-    Alert.alert(
-      'Scanned Data',
-      data,
-      [
-        {
-          text: 'Continue',
-          onPress: () => {
-            console.log('Continue Pressed');
-            triggerFirework();
-          },
-        },
-        {
-          text: 'Try Again',
-          onPress: () => setScanned(false),
-        },
-      ],
-      { cancelable: false }
-    );
-  };
-
-  const triggerFirework = () => {
-    setFireworkVisible(true);
-    setTimeout(() => {
-      setFireworkVisible(false); // Hide the firework after it finishes
-    }, 3000); // Adjust the duration to match the firework animation length
-    Alert.alert(
-      'Congratulations!',
-      'You have successfully find one of our favorite locations!',
-      [
-        {
-          text: 'Continue',
-          onPress: () => {
-            console.log('Continue Pressed');
-          },
-        },
-      ],
-      { cancelable: false }
-    );
-  };
-
   return (
     <View style={styles.container}>
       <CameraView
         style={styles.camera}
-        type='front'
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
       />
-
-      {scanned && (
-        <View style={styles.scanResultContainer}>
-          <Text style={styles.scanResultText}>Scanned Data: {scannedData}</Text>
-          <Button title="Scan Again" onPress={() => setScanned(false)} color="#8A2BE2" />
-        </View>
-      )}
-
       {fireworkVisible && (
-        <ConfettiCannon
-          ref={fireworkRef}
-          count={50}
-          origin={{ x: -10, y: 0 }}
-          explosionSpeed={350}
-          fallSpeed={2500}
-          fadeOut
-        />
+        <ConfettiCannon ref={fireworkRef} count={50} origin={{ x: -10, y: 0 }} />
+      )}
+      {scanned && (
+        <Button title="Scan Again" onPress={() => setScanned(false)} color="#8A2BE2" />
       )}
     </View>
   );
