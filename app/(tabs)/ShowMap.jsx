@@ -157,10 +157,8 @@ export default function ShowMap() {
         },
         nearbyLocation: {}
     };
+    
     const [ mapState, setMapState ] = useState(initialMapState);
-
-    console.log("colorScheme", colorScheme);
-
     useEffect(() => {
         async function requestLocationPermission() {
             const { status } = await Location.requestForegroundPermissionsAsync();
@@ -227,7 +225,7 @@ export default function ShowMap() {
                 locationSubscription.remove();
             }
         };
-    }, [mapState.locationPermission]);
+    }, [mapState.locationPermission, isFocused]);
 
     return (
         <>

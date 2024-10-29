@@ -89,7 +89,7 @@ export default function QRCodeScanner() {
   if (!permission.granted) {
     return (
       <View style={styles.permissionContainer}>
-        <Text>We need your permission to show the camera</Text>
+        <Text style={styles.permissionMessage}>Camera permissions are required to scan QR codes.</Text>
         <Button onPress={requestPermission} title="Grant permission" color="#8A2BE2" />
       </View>
     );
@@ -153,4 +153,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlign: 'center',
   },
+  permissionMessage: {
+    marginBottom: 20,
+    textAlign: 'center', // Keeps the text centered
+    width: '100%',       // Ensures the text spans the full width of the container
+    flexWrap: 'wrap',    // Enables wrapping to a new line
+    alignSelf: 'center', // Ensures that the element is centered inside any flex container
+  },
+
 });

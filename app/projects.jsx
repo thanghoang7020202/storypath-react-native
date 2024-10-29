@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
 import { getProjects, deleteProject, getProjectParticipantCounts, addTracking, getTrackings } from "../components/api";
 import { useUsername } from './usernameContext';
 
 export default function ProjectList() {
+
+  const isFocused = useIsFocused();
   const router = useRouter();
   const { username, setUsername } = useUsername();  // Use the context
   const { id } = useLocalSearchParams();
@@ -30,7 +32,7 @@ export default function ProjectList() {
     };
 
     fetchProjects();
-  }, [id]);
+  }, [id, isFocused]);
 
   // Handle deleting a project
   const handleDelete = async (projectId) => {
