@@ -5,6 +5,7 @@ import * as Location from 'expo-location';
 import { getDistance } from "geolib";
 //import { locations } from "../data/locations";
 import { useProjectId } from ".././projectIdContext";
+import { useUsername } from "../usernameContext";
 import { getProject, getTrackings, addTracking, getLocations } from "../../components/api";
 
 // Define Stylesheet
@@ -64,6 +65,7 @@ export default function ShowMap() {
 
     const [locations, setLocations] = useState([]);
     const {projectId, setProjectId } = useProjectId();
+    const {username, setUsername } = useUsername();
     const [trackings, setTrackings] = useState([]);
     const [isWithin100m, setIsWithin100m] = useState(false);
     const [nearestLocation, setNearestLocation] = useState(null); // new
@@ -81,7 +83,7 @@ export default function ShowMap() {
             }
         }
         fetchData();
-    }, [projectId, isWithin100m]);
+    }, [projectId, isWithin100m, nearestLocation]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -113,30 +115,36 @@ export default function ShowMap() {
     // add a new tracking entry if user is within 100m of a location entry point and has not visited the location before (not in trackings)
     useEffect(() => {
         const addTrackingEntry = async () => {
-            if (isWithin100m && nearestLocation && !trackings.some(tracking => tracking.location_id === nearestLocation.id)) {
+            if (isWithin100m && nearestLocation != null
+                && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)) {
                 const newTracking = {
                     project_id: projectId,
                     location_id: nearestLocation.id,
                     points: nearestLocation.score_points,
                     username: "s4759487", // fixed username for now
-                    participant_username: "testuser",
+                    participant_username: username,
                 };
                 try {
                     await addTracking(newTracking);
                     setTrackings(prevTrackings => [...prevTrackings, newTracking]);
                     console.log('Tracking added:', newTracking);
+                    Alert.alert(
+                        "Visit Location Alert",
+                        "You have successfully visited a location! Keep exploring! 🚀",
+                    );
                 } catch (error) {
                     console.error('Error adding tracking in ShowMap:', error);
                 }
             } else {
-                Alert.alert(
-                    "Visit Location Alert",
-                    "You are not within 100m of a location entry point or you have already visited this location!"
-                );
+                // Alert.alert(
+                //     "Visit Location Alert",
+                //     "You are not within 100m of a location entry point or you have already visited this location! Keep exploring! 🚀",
+                // );
+                console.log(isWithin100m, nearestLocation, !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username));
             }
         };
         addTrackingEntry();
-    }, [isWithin100m, nearestLocation, trackings]);
+    }, [isWithin100m, nearestLocation, trackings, username]);
 
     // Setup state for map data
     const initialMapState = {
