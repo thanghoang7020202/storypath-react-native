@@ -5,31 +5,43 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useProjectId } from ".././projectIdContext";
 import { useUsername } from "../usernameContext";
-import { getTrackings, addTracking, getLocations } from "../../components/api";
+import { getTrackings, addTracking, getLocations, getProjects } from "../../components/api";
 
 export default function QRCodeScanner() {
-  const isFocused = useIsFocused();
-  const [scanned, setScanned] = useState(false);
-  const [scannedData, setScannedData] = useState('');
-  const [fireworkVisible, setFireworkVisible] = useState(false);
-  const [locations, setLocations] = useState([]);
-  const [trackings, setTrackings] = useState([]);
-  const fireworkRef = useRef(null);
-  const [permission, requestPermission] = useCameraPermissions();
-  const { projectId } = useProjectId();
-  const { username } = useUsername();
+  const isFocused = useIsFocused();                               // Get the focused state
+  const [scanned, setScanned] = useState(false);                  // State to hold the scanned state
+  const [scannedData, setScannedData] = useState('');             // State to hold the scanned data
+  const [fireworkVisible, setFireworkVisible] = useState(false);  // State to hold the firework visibility
+  const [locations, setLocations] = useState([]);                 // State to hold the locations
+  const [trackings, setTrackings] = useState([]);                 // State to hold the trackings
+  const fireworkRef = useRef(null);                               // Ref to the ConfettiCannon component
+  const [permission, requestPermission] = useCameraPermissions(); // Get the camera permissions
+  const { projectId } = useProjectId();                           // Get the project ID
+  const [project, setProject] = useState(null);                   // State to hold the project
+  const { username } = useUsername();                             // Get the username
 
+  /**
+   * Function to handle the scanned barcode
+   */
   useEffect(() => {
     // Fetch locations and trackings when component mounts
     const fetchData = async () => {
       try {
+        // Fetch locations
         const locationData = await getLocations();
         const projectLocations = locationData.filter(location => location.project_id === projectId);
         setLocations(projectLocations);
+        
+        // Fetch project
+        const projectData = await getProjects();
+        const project = projectData.find(project => project.id === projectId);
+        setProject(project);
 
+        // Fetch trackings
         const trackingData = await getTrackings();
         const projectTrackings = trackingData.filter(tracking => tracking.project_id === projectId);
         setTrackings(projectTrackings);
+
       } catch (error) {
         console.error('Error fetching data in QRCodeScanner:', error);
       }
@@ -37,32 +49,45 @@ export default function QRCodeScanner() {
     fetchData();
   }, [projectId, isFocused]);
 
+  /**
+   * Function to handle the scanned barcode
+   * @param {Object} event The barcode scan event
+   * */
   const handleBarCodeScanned = ({ type, data }) => {
     setScanned(true);
     setScannedData(data);
 
     // Check if the scanned data matches any location name and hasn't been tracked
     const matchingLocation = locations.find(location => location.location_name.trim() === data.trim());
-    // check if matched location has location_trigger is ""Both Location Entry and QR Code Scan" or "QR Code Scan"
-    if (matchingLocation.location_trigger !== "Both Location Entry and QR Code Scan" && matchingLocation.location_trigger !== "QR Code Scan") {
+    
+    // UNCOMMNENT THE LINE BELOW to test location_trigger, otherwise project.participant_scoring will be used
+    //if (matchingLocation.location_trigger !== "Both Location Entry and QR Code Scan" && matchingLocation.location_trigger !== "QR Code Scan") {
+    if (project.participant_scoring === "Number of Locations Entered") {
       Alert.alert('QR Code', 'This location requires a physical visit!', [
         { text: 'Try Again', onPress: () => setScanned(false) },
       ]);
       return;
     }
 
+    // Check if the location has already been tracked by the user
     const alreadyTracked = matchingLocation && trackings.some(tracking => tracking.location_id === matchingLocation.id && tracking.participant_username === username);
 
+    // Add tracking entry if location found and not already tracked
     if (matchingLocation && !alreadyTracked) {
       addTrackingEntry(matchingLocation);
       triggerFirework();
     } else {
+      // Display alert if location not found or already tracked
       Alert.alert('QR Code', alreadyTracked ? 'Location already visited!' : 'Location not found!', [
         { text: 'Try Again', onPress: () => setScanned(false) },
       ]);
     }
   };
 
+  /**
+   * Function to add a tracking entry
+   * @param {Object} location The location to add the tracking entry for
+   * */
   const addTrackingEntry = async (location) => {
     const newTracking = {
       project_id: projectId,
@@ -80,11 +105,15 @@ export default function QRCodeScanner() {
     }
   };
 
+  /**
+   * Function to trigger the firework animation
+   * */
   const triggerFirework = () => {
     setFireworkVisible(true);
     setTimeout(() => setFireworkVisible(false), 3000);
   };
 
+  // Display the camera view
   if (!permission) return <Text>Requesting camera permissions...</Text>;
   if (!permission.granted) {
     return (
@@ -97,13 +126,19 @@ export default function QRCodeScanner() {
 
   return (
     <View style={styles.container}>
+
+      {/* Display the camera view */}
       <CameraView
         style={styles.camera}
         onBarcodeScanned={scanned ? undefined : handleBarCodeScanned}
       />
+
+      {/* firework animation if scan is successful */}
       {fireworkVisible && (
         <ConfettiCannon ref={fireworkRef} count={50} origin={{ x: -10, y: 0 }} />
       )}
+      
+      {/* Display the scan result */}
       {scanned && (
         <Button title="Scan Again" onPress={() => setScanned(false)} color="#8A2BE2" />
       )}
@@ -111,6 +146,7 @@ export default function QRCodeScanner() {
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,

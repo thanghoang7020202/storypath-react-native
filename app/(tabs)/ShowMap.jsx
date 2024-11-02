@@ -4,33 +4,21 @@ import MapView, { Circle } from "react-native-maps";
 import { useIsFocused } from '@react-navigation/native';
 import * as Location from 'expo-location';
 import { getDistance } from "geolib";
-//import { locations } from "../data/locations";
 import { useProjectId } from ".././projectIdContext";
 import { useUsername } from "../usernameContext";
-import { getProject, getTrackings, addTracking, getLocations } from "../../components/api";
-
-// Define Stylesheet
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-    nearbyLocationSafeAreaView: {
-        backgroundColor: "black",
-    },
-    nearbyLocationView: {
-        padding: 20,
-    },
-    nearbyLocationText: {
-        color: "white",
-        lineHeight: 25
-    }
-});
+import { getProject, getTrackings, addTracking, getLocations, getProjects } from "../../components/api";
 
 // Get light or dark mode
 const colorScheme = Appearance.getColorScheme();
 
-// Component for displaying nearest location and whether it's within 100 metres
+/**
+ * Function to display the nearby location
+ * @param {Object} props The props passed to the component (location, distance)
+ * @returns {JSX.Element}
+ */
 function NearbyLocation(props) {
+
+    // if location exists, display the location name
     if(typeof props.location != "undefined") {
         return (
             <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
@@ -50,6 +38,7 @@ function NearbyLocation(props) {
             </SafeAreaView>
         );
     } else {
+        // if location does not exist, display a message
         return (
             <SafeAreaView style={styles.nearbyLocationSafeAreaView}>
                 <View style={styles.nearbyLocationView}>
@@ -64,21 +53,28 @@ function NearbyLocation(props) {
 
 export default function ShowMap() {
 
-    const isFocused = useIsFocused();
-    const [locations, setLocations] = useState([]);
-    const {projectId, setProjectId } = useProjectId();
-    const {username, setUsername } = useUsername();
-    const [trackings, setTrackings] = useState([]);
-    const [isWithin100m, setIsWithin100m] = useState(false);
-    const [nearestLocation, setNearestLocation] = useState(null); // new
+    const isFocused = useIsFocused();                               // Check if the screen is focused
+    const [locations, setLocations] = useState([]);                 // State to hold the locations
+    const {projectId, setProjectId } = useProjectId();              // Get the project ID
+    const {username, setUsername } = useUsername();                 // Get the username
+    const [trackings, setTrackings] = useState([]);                 // State to hold the trackings
+    const [isWithin100m, setIsWithin100m] = useState(false);        // State to hold the 100m radius
+    const [nearestLocation, setNearestLocation] = useState(null);   // State to hold the nearest location
+    const [project, setProject] = useState(null);                   // State to hold the project
 
-    // update trackings
+    /**
+     * Function to fetch the trackings and locations
+     */
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const trackingData = await getTrackings();
+                const trackingData = await getTrackings();          // Fetch the trackings
+                const projectData = await getProjects();            // Fetch the projects
+
+                const project = projectData.find(project => project.id === projectId);
+                setProject(project);
+
                 const data = trackingData.filter(tracking => tracking.project_id == projectId);
-                console.log("trackings", data);
                 setTrackings(data);
             } catch (error) {
                 console.error('Error fetching trackings in ShowMap:', error);
@@ -87,39 +83,46 @@ export default function ShowMap() {
         fetchData();
     }, [projectId, isWithin100m, nearestLocation, isFocused]);
 
+    /**
+     * Function to fetch the locations
+     * @returns {void}
+     * */
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const locationData = await getLocations();
                 const data = locationData.filter(location => location.project_id == projectId);
                 const updatedLocations = data.map(location => {
-                    if (location.location_trigger === "Location Entry" || location.location_trigger === "Both Location Entry and QR Code Scan") {
-                        const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
-                        return {
-                            id: location.id,
-                            location: location.location_name,
-                            score_points: location.score_points,
-                            coordinates: { latitude, longitude }
-                        };
-                    }
+                
+                // UNCOMMNENT THE LINE BELOW to test location_trigger, otherwise project.participant_scoring will be used
+                //if (location.location_trigger === "Location Entry" || location.location_trigger === "Both Location Entry and QR Code Scan") {
+                const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
+                return {
+                    id: location.id,
+                    location: location.location_name,
+                    score_points: location.score_points,
+                    coordinates: { latitude, longitude }
+                };
                     return null;
                 }).filter(Boolean);
-                
                 setLocations(updatedLocations);
-                console.log("locations", updatedLocations);
             } catch (error) {
                 console.error('Error fetching locations in ShowMap:', error);
             }
         };
         fetchData();
-    }, [projectId]);
+    }, [projectId, project, isWithin100m, nearestLocation, isFocused]);
 
-    // add a new tracking entry if user is within 100m of a location entry point and has not visited the location before (not in trackings)
+    /**
+     * Function to add a tracking entry
+     * @param {Object} location The location to add the tracking entry for
+     * */
     useEffect(() => {
         const addTrackingEntry = async () => {
-            // Check if nearestLocation exists and is within 100m
+            // Check if nearestLocation exists, is within 100m, has not been tracked and only add if project scoring is "Number of Locations Entered" or "Not Scored"
             if (isWithin100m && nearestLocation
-                && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)) {
+                && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)
+                && (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Not Scored")) { 
                 const newTracking = {
                     project_id: projectId,
                     location_id: nearestLocation.id,
@@ -127,6 +130,8 @@ export default function ShowMap() {
                     username: "s4759487", // fixed username for now
                     participant_username: username,
                 };
+
+                // Add tracking entry
                 try {
                     await addTracking(newTracking);
                     setTrackings(prevTrackings => [...prevTrackings, newTracking]);
@@ -139,14 +144,17 @@ export default function ShowMap() {
                     console.error('Error adding tracking in ShowMap:', error);
                 }
             } else {
-                console.log(isWithin100m, nearestLocation, trackings.some(tracking => tracking.location_id === nearestLocation?.id && tracking.participant_username === username));
+                // Debugging log
+                
+                console.log('No tracking added:', isWithin100m, nearestLocation, 
+                    trackings.some(tracking => tracking.location_id === nearestLocation?.id && tracking.participant_username === username));
             }
         };
         addTrackingEntry();
     }, [isWithin100m, nearestLocation, trackings, username]);
     
 
-    // Setup state for map data
+    // Setup state for map data (avoid null values for initial state)
     const initialMapState = {
         locationPermission: false,
         locations: locations,
@@ -157,16 +165,24 @@ export default function ShowMap() {
         },
         nearbyLocation: {}
     };
-    
-    const [ mapState, setMapState ] = useState(initialMapState);
+
+    const [ mapState, setMapState ] = useState(initialMapState);    // State to hold the map data
+    /**
+     * Function to request location permission
+     * @returns {void}
+     * */
     useEffect(() => {
         async function requestLocationPermission() {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status === 'granted') {
+                let newLocation = locations;
+                if (project && project.homescreen_display != "Display all locations") {
+                    newLocation = locations.filter(location => trackings.some(tracking => tracking.location_id === location.id && tracking.participant_username === username));
+                }
                 setMapState(prevState => ({
                     ...prevState,
                     // filter out locations that are not in trackings
-                    locations: locations.filter(location => trackings.some(tracking => tracking.location_id === location.id && tracking.participant_username === username)),
+                    locations: newLocation,
                     locationPermission: true
                 }));
             }
@@ -174,6 +190,11 @@ export default function ShowMap() {
         requestLocationPermission();
     }, [locations, trackings, username]);
 
+    /**
+     * Function to calculate the distance between the user and the locations
+     * @param {Object} userLocation The user's location
+     * @returns {Object} The nearest location
+     * */
     useEffect(() => {
         // Function to retrieve location nearest to current user location
         function calculateDistance(userLocation) {
@@ -193,8 +214,9 @@ export default function ShowMap() {
             return nearestLocations.shift();
         }
 
-        let locationSubscription = null;
+        let locationSubscription = null; // Location subscription
 
+        // Check if location permission is granted, then watch the user's location
         if (mapState.locationPermission) {
             (async () => {
                 locationSubscription = await Location.watchPositionAsync(
@@ -229,14 +251,15 @@ export default function ShowMap() {
     }, [mapState.locationPermission, isFocused]);
 
     return (
-        <>
+        <>  
+            {/* Display the map */}
             <MapView
                 camera={{
                     center: mapState.userLocation,
-                    pitch: 0, // Angle of 3D map
-                    heading: 0, // Compass direction
-                    altitude: 3000, // Zoom level for iOS
-                    zoom: 15 // Zoom level For Android
+                    pitch: 0,                   // Angle of 3D map
+                    heading: 0,                 // Compass direction
+                    altitude: 3000,             // Zoom level for iOS
+                    zoom: 15                    // Zoom level For Android
                 }}
                 showsUserLocation={mapState.locationPermission}
                 style={styles.container}
@@ -252,9 +275,28 @@ export default function ShowMap() {
                     />
                 ))}
             </MapView>
+
+            {/* Display the nearby location */}
             <NearbyLocation
                 {...mapState.nearbyLocation}
             />
         </>
     );
 }
+
+// Define Stylesheet
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    nearbyLocationSafeAreaView: {
+        backgroundColor: "black",
+    },
+    nearbyLocationView: {
+        padding: 20,
+    },
+    nearbyLocationText: {
+        color: "white",
+        lineHeight: 25
+    }
+});

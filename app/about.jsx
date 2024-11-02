@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, Linking, ScrollView, TouchableOpacity, Button } from 'react-native';
+import { useRouter } from 'expo-router';
 
 const About = () => {
+  const router = useRouter();     // Get the router object
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Title and Subtitle */}
@@ -60,7 +63,7 @@ const About = () => {
           </Text>. Contributions are always welcome! Fork the repository and submit a pull request to help improve the platform.
         </Text>
       </View>
-      <Button onPress={() => router.back()} title='Go Back' />
+      <Button title="Go Back" onPress={() => router.back()} color={'#8A2BE2'} />
     </ScrollView>
   );
 };

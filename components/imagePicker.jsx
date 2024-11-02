@@ -6,6 +6,7 @@ import {SafeAreaView, ScrollView, View, Image, Dimensions, Text, Button } from '
 // Get the screen width and height for styling
 const { width, height } = Dimensions.get("window");
 
+// Styles
 const styles = {
     container: {
         padding: 20
@@ -88,8 +89,14 @@ const ImagePickerScreen = ({ onImageSelect, onCloseImage }) => {
 
     return (
         <View>
+
+            {/* Display the photo and buttons */}
             <View style={styles.container}>
+
+                {/* Display the photo or a placeholder */}
                 <Photo />
+
+                {/* Display the "Add Photo" and "Change Photo" buttons */}
                 <View style={styles.buttonView}>
                 <Button
                     onPress={pickImage}
@@ -99,6 +106,7 @@ const ImagePickerScreen = ({ onImageSelect, onCloseImage }) => {
                 </View>
             </View>
 
+            {/* Display the selected image URI */}
             {selectedImage && (
                 <View style={{ marginTop: 20 }}>
                 <Text>Selected image: {selectedImage.uri}</Text>
@@ -106,7 +114,7 @@ const ImagePickerScreen = ({ onImageSelect, onCloseImage }) => {
                 </View>
             )}
 
-            {/* Optionally, you could add a "Cancel" button */}
+            {/* Display the cancel button */}
             <Button title="Cancel" onPress={onCloseImage} />
         </View>
     );

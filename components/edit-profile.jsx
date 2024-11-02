@@ -4,17 +4,20 @@ import ImagePickerScreen from './imagePicker'; // Import ImagePicker component
 import { getTracking, getTrackings, getProjects, getLocations } from './api'; // Import API functions
 
 export default function EditProfile({ username, onUsernameChange, onCloseEditProfile }) {
-  const [name, setName] = useState(username || ''); // Username state (or default value)
-  const [email, setEmail] = useState('john.doe@example.com'); // Default email state
-  const [initialData, setInitialData] = useState({ name, email }); // Used to track unsaved changes
-  const [isSubmitting, setIsSubmitting] = useState(false); // Save button state
-  const [errorFields, setErrorFields] = useState([]); // Track invalid fields
+  const [name, setName] = useState(username || '');                 // Username state (or default value)
+  const [email, setEmail] = useState('john.doe@example.com');       // Default email state
+  const [initialData, setInitialData] = useState({ name, email });  // Used to track unsaved changes
+  const [isSubmitting, setIsSubmitting] = useState(false);          // Save button state
+  const [errorFields, setErrorFields] = useState([]);               // Track invalid fields
 
+  /**
+   * Function to fetch tracking data for the current user
+   */
   const fetchTracking = async () => {
     try {
-      let data = await getTrackings();
-      let projectList = await getProjects();
-      let locationList = await getLocations();
+      let data = await getTrackings();        // Fetch all tracking data
+      let projectList = await getProjects();  // Fetch all projects
+      let locationList = await getLocations();// Fetch all locations
 
       data = data.filter((tracking) => tracking.participant_username === name);
       
@@ -23,28 +26,36 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
       if (data.length > 0) {
         projectList = projectList.filter((project) => project.id === data[0].project_id);
         locationList = locationList.filter((location) => location.id === data[0].location_id);
-        // Display the previous tracking data project names and location names
+        
+        // Display a welcome message with the user's previous tracking data
         Alert.alert(
-          "Welcome back " + name + "!",
-          "Your previous tracking data has been restored.\n\n" +
-          "Previous project: " + projectList[0].title + "\n" +
-          "Previous location: " + locationList[0].location_name + "\n" +
-          "Previous points: " + data[0].points + "\n" +
-          "Enjoy your journey!"
+          `Welcome back, ${name}! 🎉`,
+          `Your previous tracking data has been restored!\n\n` +
+          `• **Previous Project**: ${projectList[0].title} 📂\n` +
+          `• **Last Location**: ${locationList[0].location_name} 📍\n` +
+          `• **Points Earned**: ${data[0].points} 🌟\n\n` +
+          `Enjoy your journey and keep exploring! 🚀`
         );
       } else {
-        Alert.alert( "Welcome to StoryPath " + name + "!",
-          "You have successfully created your profile.\n\n" +
-          "You can now explore unlimited location-based experiences with StoryPath. From city tours to treasure hunts, the possibilities are endless!\n\n" +
-          "Please keep in mind that this username will not be saved if you not participate in any project.\n\n Enjoy your journey!",
+
+        // Display a welcome message for new users
+        Alert.alert(
+          `Welcome to StoryPath, ${name}! 🎉`,
+          `Your profile has been successfully created! 📝\n\n` +
+          `🌍 **Explore**: Discover unlimited location-based experiences—from city tours to treasure hunts! The possibilities are endless!\n\n` +
+          `⚠️ **Note**: This username will only be saved if you participate in a project.\n\n` +
+          `Enjoy your journey! 🚀`
         );
+        
       }
     } catch (error) {
       console.error('Error fetching tracking:', error);
     }
   };
 
-  // Handle Save button action
+  /**
+   * Function to handle the save button
+   * */
   function handleSave() {
     const errors = [];
     if (!name) errors.push('name');
@@ -70,13 +81,20 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
     }, 1000);
   }
 
-  // Check for unsaved changes
+  /**
+   * Function to check if there are unsaved changes
+   * @returns {Boolean} True if there are unsaved changes, false otherwise
+   * */
   function hasUnsavedChanges() {
     return name !== initialData.name || email !== initialData.email;
   }
 
-  // Handle Cancel button with unsaved changes confirmation
+  /**
+   * Function to handle the cancel button
+   * */
   function handleCancel() {
+
+    // if there are unsaved changes, prompt the user to confirm
     if (hasUnsavedChanges()) {
       Alert.alert(
         'Unsaved Changes',
@@ -93,6 +111,7 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
 
   return (
     <View style={styles.container}>
+      
       {/* Edit Profile Header */}
       <Text style={styles.headerText}>Edit Profile</Text>
 
@@ -119,12 +138,12 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
 
       {/* Save Button */}
       <View style={styles.buttonWrapper}>
-        <Button title={isSubmitting ? 'Saving...' : 'Save Profile'} onPress={handleSave} disabled={isSubmitting} color="#ff6f61"/>
+        <Button title={isSubmitting ? 'Saving...' : 'Save Profile'} onPress={handleSave} disabled={isSubmitting} color="#8A2BE2"/>
       </View>
 
       {/* Cancel Button */}
       <View  style={styles.buttonWrapper}>
-        <Button onPress={handleCancel} title={hasUnsavedChanges() ? 'Cancel' : 'Close'} style={styles.buttonWrapper} color="#ff6f61"/>
+        <Button onPress={handleCancel} title={hasUnsavedChanges() ? 'Cancel' : 'Close'} style={styles.buttonWrapper} color="#8A2BE2"/>
       </View>
     </View>
   );
@@ -141,12 +160,12 @@ const styles = {
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#ff6f61',
+    color: '#8A2BE2',
     marginBottom: 20,
   },
   tapText: {
     position: 'absolute',
-    color: '#ff6f61',
+    color: '#8A2BE2',
     fontSize: 12,
     bottom: 5,
     textAlign: 'center',

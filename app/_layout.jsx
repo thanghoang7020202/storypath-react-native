@@ -8,14 +8,21 @@ import { profile } from './profile';
 
 import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
 
-// Custom Drawer Content Component
+/**
+ * Custom Drawer Content Component
+ * @param {Object} props The props passed to the component (username)
+ * @returns {JSX.Element}
+ */
 const CustomDrawerContent = (props) => { // props is the username
-  const pathname = usePathname();
-  const router = useRouter();
+  const pathname = usePathname();         // Get the current pathname
+  const router = useRouter();             // Get the router object
 
   // Get the username and updateUsername function passed from Layout
   const {username, setUsername} = useUsername();
 
+  /**
+   * Function to log the current path (debugging)
+   */
   useEffect(() => {
     console.log('Current Path', pathname);
   }, [pathname]);
@@ -37,7 +44,7 @@ const CustomDrawerContent = (props) => { // props is the username
         style={{ backgroundColor: pathname === '/' ? '#8A2BE2' : '#fff' }}
         onPress={() => router.push('/')}
       />
-
+      
       <DrawerItem
         icon={({ color, size }) => (
           <FontAwesome name="user" size={size} color={pathname === '/profile' ? '#fff' : '#000'} />
@@ -77,9 +84,9 @@ const CustomDrawerContent = (props) => { // props is the username
 // Main Layout with Drawer
 export default function Layout() {
 
-  //const [username, setUsername] = useState('participant_username');
-  const { username, setUsername } = useUsername(); // Use the context
+  const { username, setUsername } = useUsername(); // Use the username context
 
+  // Set the default username (should be changed later)
   setUsername('participant_1');
   return (
     <UsernameProvider>

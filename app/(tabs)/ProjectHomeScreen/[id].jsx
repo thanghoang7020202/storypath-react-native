@@ -10,50 +10,85 @@ import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 import { useUsername } from '../../usernameContext';
 import { useProjectId } from '../../projectIdContext';
 
+/**
+ * Styled Picker Item component
+ * @param {Object} props The component props (label, value, selectedLocation, locationsVisited)
+ * where label is the location name, value is the location name, selectedLocation is the selected location, and locationsVisited is the visited locations
+ * @returns {JSX.Element} The styled picker item
+ * */
 function StyledPickerItem({ label, value, selectedLocation, locationsVisited }) {
-  let itemStyle = styles.unvisited; // Default for unvisited locations
-  console.log('locationsVisitedStyledPickerItem:', locationsVisited);
+  let itemStyle = styles.unvisited;                                   // Default for unvisited locations
+  
+  // If the location is visited, change the style to green
   if (locationsVisited.includes(value)) {
-    itemStyle = styles.visited; // Green for visited locations
+    itemStyle = styles.visited; 
   }
+
+  // If the location is the selected location, add a purple border
   if (value === selectedLocation) {
     itemStyle = { ...itemStyle, ...styles.selected }; // Add purple border for the current location
   }
-
   return (
     <Picker.Item label={label} value={value} style={itemStyle} />
   );
 }
 
+/**
+ * Project Home Screen component
+ * @param {Object} route The route object
+ * @returns {JSX.Element} The project home screen component
+ * */
 export default function ProjectHomeScreen({ route }) {
-  const isFocused = useIsFocused();
-  const router = useRouter();
-  const { id, username: usernameFromRoute } = useLocalSearchParams();            // projectId, update when in focus
+  const isFocused = useIsFocused();                                       // Get the focused state            
+  const router = useRouter();                                             // Get the router object
+  const { id, username: usernameFromRoute } = useLocalSearchParams();     // projectId, update when in focus
 
-  const { username, setUsername } = useUsername();  // Use the context (setUsername is not used in this component)
-  const { projectId, setProjectId } = useProjectId(); // Use the context
+  const { username, setUsername } = useUsername();                        // Use the username context (setUsername is not used in this component)
+  const { projectId, setProjectId } = useProjectId();                     // Use the projectId context (setProjectId is not used in this component)
   
-  const [project, setProject] = useState(null);
-  const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState('Homescreen');
-  const [points, setPoints] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [locationsVisited, setLocationsVisited] = useState([]);
-  const [userTrackings, setUserTrackings] = useState([]);
-
-  useEffect(() => {
-    const wellcomeMessage = async () => {
-      Alert.alert(
-        "🎉✨ Welcome, Superstar! ✨🎉", 
-        `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
-      );
-    }
-    wellcomeMessage();
-  }, [username]);
+  const [project, setProject] = useState(null);                           // State to hold the project
+  const [locations, setLocations] = useState([]);                         // State to hold the locations
+  const [selectedLocation, setSelectedLocation] = useState('Homescreen'); // State to hold the selected location
+  const [points, setPoints] = useState(0);                                // State to hold the points
+  const [totalPoints, setTotalPoints] = useState(0);                      // State to hold the total points
+  const [locationsVisited, setLocationsVisited] = useState([]);           // State to hold the visited locations 
+  const [userTrackings, setUserTrackings] = useState([]);                 // State to hold the user trackings
+  const [viewInstructions, setViewInstructions] = useState(true);         // State to hold the view instructions flag
 
   /**
-     * Fetch the project and locations when the component mounts.
-     */
+   * Display a welcome message when the component mounts.
+   * */
+  useEffect(() => {
+    const welcomeMessage = async () => {
+      Alert.alert(
+        "✨ Welcome to Your Adventure! ✨",
+        `Hello ${username}! 🎉🎉🎉
+        \n---- Game Overview 🕹️ ----
+        • Select a location from the dropdown below.
+        • Follow clues to explore the area! 🗺️
+        • Some locations may require:
+            - A 🗺️ Physical Visit (marked with a map icon).
+            - A 🔍 QR Code Scan (marked with a QR icon).
+        • Your points and the number of visited locations update automatically!
+  
+        \n---- Earn Points 📈 ----
+        • Certain locations offer points.
+        • Earn by visiting and scanning QR codes.
+  
+        \n---- Discover Content 📜 ----
+        • Once a location is visited, location content will be displayed.
+  
+        🌟 ENJOY YOUR JOURNEY! 🌟,`
+      );
+    };
+    welcomeMessage();
+  }, [username, viewInstructions]);
+  
+
+
+  /**
+   * Fetch the project and locations when the component mounts.
+   */
   useEffect(() => {
     const fetchProjectAndLocations = async () => {
       try {
@@ -83,29 +118,36 @@ export default function ProjectHomeScreen({ route }) {
       }
     };
     fetchProjectAndLocations();
-}, [id, isFocused]);
+}, [id, isFocused, projectId, usernameFromRoute]);
 
-  // using the useEffect hook to update thr points and locations visited count from trackings
+  /**
+   * Handle the location change event.
+   * */
   useEffect(() => {
     const updatePointsAndLocationsVisited = () => {
         try {
           let points = 0;
-        const locationsVisited = new Set();
-        userTrackings.forEach(tracking => {
+          const locationsVisited = new Set();
+          userTrackings.forEach(tracking => {
             const location = locations.find((loc) => loc.id === tracking.location_id);
             if (location) {
                 points += location.score_points;
                 locationsVisited.add(location.location_name);
             }
-        });
-        setPoints(points);
-        setLocationsVisited(Array.from(locationsVisited));
+          });
+          // Options include: "Not Scored", "Number of Scanned QR Codes", "Number of Locations Entered"
+          if (project && (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Number of Scanned QR Codes")) {
+            setPoints(points);
+          } else {
+            setPoints("Not Scored");
+          }
+          setLocationsVisited(Array.from(locationsVisited));
         } catch (error) {
-            console.warn('Error updating points and locations visited:', error);
+          console.warn('Error updating points and locations visited:', error);
         }
     };
     updatePointsAndLocationsVisited();
-  }, [userTrackings, locations, isFocused]);
+  }, [userTrackings, locations, isFocused, project]);
 
 
   /**
@@ -114,46 +156,51 @@ export default function ProjectHomeScreen({ route }) {
      * @returns {void}
      * */
   const handleLocationChange = (event) => {
-    const newLocation = event;
-    setSelectedLocation(newLocation);
+    const newLocation = event;              // Get the new location
+    setSelectedLocation(newLocation);       // Update the selected location
 
     // Update score and locations visited count
     if (newLocation !== 'Homescreen') {
         const location = locations.find((loc) => loc.location_name === newLocation);
-        const newLocationsVisited = new Set([...locationsVisited, location.location_name]);
-        // alert if the selected location is already visited
-        if (locationsVisited.includes(location.location_name)) {
-            Alert.alert(
-                'Location Already Visited',
-                'You have already visited this location. Please select another location.',
-                [{ text: 'OK' }]
-            );
-        }
-        setLocationsVisited(Array.from(newLocationsVisited));
     }
   };
 
+  // If the project or locations are not loaded, show a loading message
   if (!project || locations.length === 0) {
-    return <Text>No location found. Keep loading...</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>No location found. Keep loading...</Text>
+        <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
+      </View>
+    );
   }
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
+    
     {/* Title with background */}
     <View style={styles.titleContainer}>
       <Text style={styles.titleText}>{project.title}</Text>
     </View>
 
+    {/* Location Picker */}
     <Picker
       selectedValue={selectedLocation}
       onValueChange={handleLocationChange}
       style={styles.picker}
+      // add style to the all the items in the picker
+      itemStyle={{ fontSize: 18, color: 'blue', fontWeight: 'bold' }}
     >
       <Picker.Item label="Homescreen" value="Homescreen" style={styles.visited} />
       {locations.map((location) => (
         <StyledPickerItem
           key={location.id}
-          label={location.location_name}
+          // if location is visited then show the location name else "📍 Hidden location".
+          label={
+            locationsVisited.includes(location.location_name)
+              ? `📍 ${location.location_name}`
+              : "📍 Hidden location..."
+          }
           value={location.location_name}
           selectedLocation={selectedLocation}
           locationsVisited={locationsVisited}
@@ -161,6 +208,7 @@ export default function ProjectHomeScreen({ route }) {
       ))}
     </Picker>
 
+    {/* Location Clue and Content */}
     {selectedLocation === 'Homescreen' ? (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Instructions</Text>
@@ -175,36 +223,40 @@ export default function ProjectHomeScreen({ route }) {
 
         <Text style={styles.sectionTitle}>Location Content 📜</Text>
         {
-          (locations.find(loc => loc.location_name === selectedLocation)?.location_content) ? (
+          // Display the location content in a WebView if content is available and that location is visited (in trackings)
+          (locations.find(loc => loc.location_name === selectedLocation)?.location_content && locationsVisited.includes(selectedLocation)) ? (
             <WebView
               source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
               style={styles.webview}
             />
           ) : (
-            <Text>No content available for this location</Text>
+            <Text>You have not visited this location yet... 🚶‍♂️</Text>
           )
         }
-        {/* <WebView
-          source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
-          style={styles.webview}
-        /> */}
       </View>
     )}
 
     {/* Points and Locations Visited */}
     <View style={styles.footerContainer}>
-      <Button title={`Points: ${points} / ${totalPoints}`} onPress={() => {}} color="#8A2BE2" />
+      {/* if points is "Not Scored" then show "Not Scored" else show points/ totalPoints */}
+      <Button title={`Points: ${points === "Not Scored" ? "Not Scored" : `${points} / ${totalPoints}`}`} onPress={() => {}} color="#8A2BE2" />
       <Button title={`Locations Visited: ${locationsVisited.length} / ${locations.length}`} onPress={() => {}} color="#8A2BE2" />
     </View>
 
-    <View style={styles.backButton}>
+    {/* View Instructions Button */}
+    <View style={styles.viewInstructions}>
+      <Button title="View Instructions" onPress={() => setViewInstructions(!viewInstructions)} color="#8A2BE2" />
+    </View>
+
     {/* Back Button */}
+    <View style={styles.backButton}>
     <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
     </View>
   </ScrollView>
   );
 };
-  
+
+// Styles
 const styles = StyleSheet.create({
   titleContainer: {
     backgroundColor: '#8A2BE2',
@@ -277,6 +329,9 @@ const styles = StyleSheet.create({
   selected: {
     borderColor: '#8A2BE2',
     borderWidth: 2,
+  },
+  viewInstructions: {
+    marginTop: 20,
   },
 });
   

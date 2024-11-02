@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Button } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
 import { getProjects, deleteProject, getProjectParticipantCounts, addTracking, getTrackings } from "../components/api";
@@ -7,23 +7,23 @@ import { useUsername } from './usernameContext';
 
 export default function ProjectList() {
 
-  const isFocused = useIsFocused();
-  const router = useRouter();
-  const { username, setUsername } = useUsername();  // Use the context
-  const { id } = useLocalSearchParams();
-  const [projectList, setProjectList] = useState([]);
-  const [projectParticipantCounts, setProjectParticipantCounts] = useState([]);
-  const navigation = useNavigation();
+  const isFocused = useIsFocused();                                             // Get the focused state          
+  const router = useRouter();                                                   // Get the router object                     
+  const { username, setUsername } = useUsername();                              // Use the context
+  const { id } = useLocalSearchParams();                                        // Get the local search params
+  const [projectList, setProjectList] = useState([]);                           // State to hold the project list
+  const [projectParticipantCounts, setProjectParticipantCounts] = useState([]); // State to hold the project participant counts
+  const navigation = useNavigation();                                           // Get the navigation object
 
-  // Fetch projects when the component mounts
+  /**
+   * Function to fetch the projects and project participant counts
+   * @param {String} username The new username
+   * */
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        let data = await getProjects();
-        const count = await getProjectParticipantCounts();
-        
-        //data = data.filter((project) => project.id !== id);
-
+        let data = await getProjects();                     // Fetch the projects
+        const count = await getProjectParticipantCounts();  // Fetch the project participant counts
         setProjectList(data);
         setProjectParticipantCounts(count);
       } catch (error) {
@@ -34,28 +34,23 @@ export default function ProjectList() {
     fetchProjects();
   }, [id, isFocused]);
 
-  // Handle deleting a project
-  const handleDelete = async (projectId) => {
-    try {
-      await deleteProject(projectId);
-      setProjectList((prevProjects) =>
-        prevProjects.filter((proj) => proj.id !== projectId)
-      );
-    } catch (error) {
-      console.error(`Error deleting project ${projectId}:`, error);
-    }
-  };
-
-  // Render each project item
+  /**
+   * Function to handle the project selection
+   * @param {Object} project The selected project
+   * */
   const renderProjectItem = ({ item }) => (
+    // Display the project item
     <TouchableOpacity
     style={styles.projectItem}
     onPress={() => {
       router.push({ pathname: `./ProjectHomeScreen/${item.id}?username=${username}` });
     }}
-  >
+  > 
     <View style={styles.projectInfo}>
+      {/* Display the project title */}
       <Text style={styles.projectTitle}>{item.title}</Text>
+      
+      {/* Display the number of participants */}
       <View style={styles.participantsBadge}>
         <Text style={styles.participantsText}>
           Participants: {projectParticipantCounts.find((count) => count.project_id === item.id)?.number_participants || 0}
@@ -63,6 +58,7 @@ export default function ProjectList() {
       </View>
     </View>
 
+    {/* Display the arrow button */}
     <View style={styles.arrowButton}>
       <Text style={styles.arrowText}>➔</Text>
     </View>
@@ -71,7 +67,11 @@ export default function ProjectList() {
 
   return (
     <View style={styles.container}>
+      {/* Display the heading and subtitle */}
       <Text style={styles.heading}>Projects</Text>
+      <Text style={styles.subTitle}>Choose one of the projects below to get started.</Text>
+      
+      {/* Display the project list */}
       {projectList.length > 0 ? (
         <FlatList
           data={projectList}
@@ -81,10 +81,14 @@ export default function ProjectList() {
       ) : (
         <Text>No projects available. Keep loading...</Text>
       )}
+
+      {/* Go Back Button */}
+      <Button title="Go Back" onPress={() => router.back()} color={'#8A2BE2'} />
     </View>
   );
 }
 
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -138,5 +142,10 @@ const styles = StyleSheet.create({
   arrowText: {
     fontSize: 24,
     color: '#8A2BE2',
+  },
+  subTitle: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
   },
 });

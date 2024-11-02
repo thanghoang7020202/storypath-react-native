@@ -1,31 +1,45 @@
 import { View, Text, Button, Image, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from 'expo-router';
-import ImagePickerScreen from '../components/imagePicker'; // Import the ImagePicker component
-import EditProfile from '../components/edit-profile'; // Import the EditProfile component
+import ImagePickerScreen from '../components/imagePicker';      // Import the ImagePicker component
+import EditProfile from '../components/edit-profile';           // Import the EditProfile component
 import { useUsername, UsernameProvider } from './usernameContext'; // Use the context
 
 export default function Profile() {
-  const router = useRouter(); // Get the router object
-  const [profileImage, setProfileImage] = useState(null); // State to hold the selected profile image
-  const { username, setUsername } = useUsername(); // Use the context
-  const [isPickerVisible, setPickerVisible] = useState(false); // State to control modal visibility
-  const [isUserEditing, setUserEditing] = useState(false); // State to control edit mode
+  const router = useRouter();                                   // Get the router object
+  const [profileImage, setProfileImage] = useState(null);       // State to hold the selected profile image
+  const { username, setUsername } = useUsername();              // Use the context
+  const [isPickerVisible, setPickerVisible] = useState(false);  // State to control modal visibility
+  const [isUserEditing, setUserEditing] = useState(false);      // State to control edit mode
 
-  // Function to handle the selected image from the ImagePicker
+  /**
+   * Function to handle the selected image from the ImagePicker
+   * @param {*} image The selected image
+   */
   function handleImageChange(image) {
     setProfileImage(image); // Update the profile image
   }
 
-  // Function to open/close the image picker
+  /**
+   * Function to open/close the image picker
+   * @returns {void}
+   * */
   function toggleImagePicker() {
     setPickerVisible(!isPickerVisible);
   }
 
+  /**
+   * Function to handle the username change
+   * @param {String} username The new username
+   * */
   function handleUsernameChange(username) {
     setUsername(username);
   }
 
+  /**
+   * Function to toggle the user editing mode
+   * @returns {void}
+   * */
   function toggleUserEditing() {
     setUserEditing(!isUserEditing);
   }
@@ -64,7 +78,8 @@ export default function Profile() {
           )}
         </TouchableOpacity>
       </View>
-
+      
+      {/* Edit Profile Modal */}
       <Modal visible={isUserEditing} animationType="slide" onRequestClose={toggleUserEditing}>
         <EditProfile username={username} onUsernameChange={handleUsernameChange} onCloseEditProfile={toggleUserEditing} />
       </Modal> 
