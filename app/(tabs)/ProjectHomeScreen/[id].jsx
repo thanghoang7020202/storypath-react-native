@@ -10,38 +10,54 @@ import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 import { useUsername } from '../../usernameContext';
 import { useProjectId } from '../../projectIdContext';
 
+/**
+ * Styled Picker Item component
+ * @param {Object} props The component props (label, value, selectedLocation, locationsVisited)
+ * where label is the location name, value is the location name, selectedLocation is the selected location, and locationsVisited is the visited locations
+ * @returns {JSX.Element} The styled picker item
+ * */
 function StyledPickerItem({ label, value, selectedLocation, locationsVisited }) {
-  let itemStyle = styles.unvisited; // Default for unvisited locations
-  console.log('locationsVisitedStyledPickerItem:', locationsVisited);
+  let itemStyle = styles.unvisited;                                   // Default for unvisited locations
+  
+  // If the location is visited, change the style to green
   if (locationsVisited.includes(value)) {
-    itemStyle = styles.visited; // Green for visited locations
+    itemStyle = styles.visited; 
   }
+
+  // If the location is the selected location, add a purple border
   if (value === selectedLocation) {
     itemStyle = { ...itemStyle, ...styles.selected }; // Add purple border for the current location
   }
-
   return (
     <Picker.Item label={label} value={value} style={itemStyle} />
   );
 }
 
+/**
+ * Project Home Screen component
+ * @param {Object} route The route object
+ * @returns {JSX.Element} The project home screen component
+ * */
 export default function ProjectHomeScreen({ route }) {
-  const isFocused = useIsFocused();
-  const router = useRouter();
-  const { id, username: usernameFromRoute } = useLocalSearchParams();            // projectId, update when in focus
+  const isFocused = useIsFocused();                                       // Get the focused state            
+  const router = useRouter();                                             // Get the router object
+  const { id, username: usernameFromRoute } = useLocalSearchParams();     // projectId, update when in focus
 
-  const { username, setUsername } = useUsername();  // Use the context (setUsername is not used in this component)
-  const { projectId, setProjectId } = useProjectId(); // Use the context
+  const { username, setUsername } = useUsername();                        // Use the username context (setUsername is not used in this component)
+  const { projectId, setProjectId } = useProjectId();                     // Use the projectId context (setProjectId is not used in this component)
   
-  const [project, setProject] = useState(null);
-  const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState('Homescreen');
-  const [points, setPoints] = useState(0);
-  const [totalPoints, setTotalPoints] = useState(0);
-  const [locationsVisited, setLocationsVisited] = useState([]);
-  const [userTrackings, setUserTrackings] = useState([]);
-  const [viewInstructions, setViewInstructions] = useState(true);
+  const [project, setProject] = useState(null);                           // State to hold the project
+  const [locations, setLocations] = useState([]);                         // State to hold the locations
+  const [selectedLocation, setSelectedLocation] = useState('Homescreen'); // State to hold the selected location
+  const [points, setPoints] = useState(0);                                // State to hold the points
+  const [totalPoints, setTotalPoints] = useState(0);                      // State to hold the total points
+  const [locationsVisited, setLocationsVisited] = useState([]);           // State to hold the visited locations 
+  const [userTrackings, setUserTrackings] = useState([]);                 // State to hold the user trackings
+  const [viewInstructions, setViewInstructions] = useState(true);         // State to hold the view instructions flag
 
+  /**
+   * Display a welcome message when the component mounts.
+   * */
   useEffect(() => {
     const welcomeMessage = async () => {
       Alert.alert(
@@ -71,8 +87,8 @@ export default function ProjectHomeScreen({ route }) {
 
 
   /**
-     * Fetch the project and locations when the component mounts.
-     */
+   * Fetch the project and locations when the component mounts.
+   */
   useEffect(() => {
     const fetchProjectAndLocations = async () => {
       try {
@@ -104,7 +120,9 @@ export default function ProjectHomeScreen({ route }) {
     fetchProjectAndLocations();
 }, [id, isFocused, projectId, usernameFromRoute]);
 
-  // using the useEffect hook to update thr points and locations visited count from trackings
+  /**
+   * Handle the location change event.
+   * */
   useEffect(() => {
     const updatePointsAndLocationsVisited = () => {
         try {
@@ -138,8 +156,8 @@ export default function ProjectHomeScreen({ route }) {
      * @returns {void}
      * */
   const handleLocationChange = (event) => {
-    const newLocation = event;
-    setSelectedLocation(newLocation);
+    const newLocation = event;              // Get the new location
+    setSelectedLocation(newLocation);       // Update the selected location
 
     // Update score and locations visited count
     if (newLocation !== 'Homescreen') {
@@ -147,6 +165,7 @@ export default function ProjectHomeScreen({ route }) {
     }
   };
 
+  // If the project or locations are not loaded, show a loading message
   if (!project || locations.length === 0) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -158,11 +177,13 @@ export default function ProjectHomeScreen({ route }) {
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
+    
     {/* Title with background */}
     <View style={styles.titleContainer}>
       <Text style={styles.titleText}>{project.title}</Text>
     </View>
 
+    {/* Location Picker */}
     <Picker
       selectedValue={selectedLocation}
       onValueChange={handleLocationChange}
@@ -187,6 +208,7 @@ export default function ProjectHomeScreen({ route }) {
       ))}
     </Picker>
 
+    {/* Location Clue and Content */}
     {selectedLocation === 'Homescreen' ? (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Instructions</Text>
@@ -233,7 +255,8 @@ export default function ProjectHomeScreen({ route }) {
   </ScrollView>
   );
 };
-  
+
+// Styles
 const styles = StyleSheet.create({
   titleContainer: {
     backgroundColor: '#8A2BE2',
