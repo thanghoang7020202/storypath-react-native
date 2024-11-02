@@ -4,17 +4,20 @@ import ImagePickerScreen from './imagePicker'; // Import ImagePicker component
 import { getTracking, getTrackings, getProjects, getLocations } from './api'; // Import API functions
 
 export default function EditProfile({ username, onUsernameChange, onCloseEditProfile }) {
-  const [name, setName] = useState(username || ''); // Username state (or default value)
-  const [email, setEmail] = useState('john.doe@example.com'); // Default email state
-  const [initialData, setInitialData] = useState({ name, email }); // Used to track unsaved changes
-  const [isSubmitting, setIsSubmitting] = useState(false); // Save button state
-  const [errorFields, setErrorFields] = useState([]); // Track invalid fields
+  const [name, setName] = useState(username || '');                 // Username state (or default value)
+  const [email, setEmail] = useState('john.doe@example.com');       // Default email state
+  const [initialData, setInitialData] = useState({ name, email });  // Used to track unsaved changes
+  const [isSubmitting, setIsSubmitting] = useState(false);          // Save button state
+  const [errorFields, setErrorFields] = useState([]);               // Track invalid fields
 
+  /**
+   * Function to fetch tracking data for the current user
+   */
   const fetchTracking = async () => {
     try {
-      let data = await getTrackings();
-      let projectList = await getProjects();
-      let locationList = await getLocations();
+      let data = await getTrackings();        // Fetch all tracking data
+      let projectList = await getProjects();  // Fetch all projects
+      let locationList = await getLocations();// Fetch all locations
 
       data = data.filter((tracking) => tracking.participant_username === name);
       
@@ -23,7 +26,8 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
       if (data.length > 0) {
         projectList = projectList.filter((project) => project.id === data[0].project_id);
         locationList = locationList.filter((location) => location.id === data[0].location_id);
-        // Display the previous tracking data project names and location names
+        
+        // Display a welcome message with the user's previous tracking data
         Alert.alert(
           `Welcome back, ${name}! 🎉`,
           `Your previous tracking data has been restored!\n\n` +
@@ -33,6 +37,8 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
           `Enjoy your journey and keep exploring! 🚀`
         );
       } else {
+
+        // Display a welcome message for new users
         Alert.alert(
           `Welcome to StoryPath, ${name}! 🎉`,
           `Your profile has been successfully created! 📝\n\n` +
@@ -47,7 +53,9 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
     }
   };
 
-  // Handle Save button action
+  /**
+   * Function to handle the save button
+   * */
   function handleSave() {
     const errors = [];
     if (!name) errors.push('name');
@@ -73,13 +81,20 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
     }, 1000);
   }
 
-  // Check for unsaved changes
+  /**
+   * Function to check if there are unsaved changes
+   * @returns {Boolean} True if there are unsaved changes, false otherwise
+   * */
   function hasUnsavedChanges() {
     return name !== initialData.name || email !== initialData.email;
   }
 
-  // Handle Cancel button with unsaved changes confirmation
+  /**
+   * Function to handle the cancel button
+   * */
   function handleCancel() {
+
+    // if there are unsaved changes, prompt the user to confirm
     if (hasUnsavedChanges()) {
       Alert.alert(
         'Unsaved Changes',
@@ -96,6 +111,7 @@ export default function EditProfile({ username, onUsernameChange, onCloseEditPro
 
   return (
     <View style={styles.container}>
+      
       {/* Edit Profile Header */}
       <Text style={styles.headerText}>Edit Profile</Text>
 
