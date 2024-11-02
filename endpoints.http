@@ -127,7 +127,7 @@ Content-Type: application/json
 }
 
 ### delete a tracking entry
-DELETE {{baseUrl}}/api/tracking?id=eq.10067
+DELETE {{baseUrl}}/api/tracking?id=eq.10102
 Authorization : Bearer {{jwtToken}}
 Content-Type: application/json
 

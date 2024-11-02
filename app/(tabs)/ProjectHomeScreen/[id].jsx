@@ -10,6 +10,21 @@ import { useGlobalSearchParams, useLocalSearchParams } from 'expo-router';
 import { useUsername } from '../../usernameContext';
 import { useProjectId } from '../../projectIdContext';
 
+function StyledPickerItem({ label, value, selectedLocation, locationsVisited }) {
+  let itemStyle = styles.unvisited; // Default for unvisited locations
+  console.log('locationsVisitedStyledPickerItem:', locationsVisited);
+  if (locationsVisited.includes(value)) {
+    itemStyle = styles.visited; // Green for visited locations
+  }
+  if (value === selectedLocation) {
+    itemStyle = { ...itemStyle, ...styles.selected }; // Add purple border for the current location
+  }
+
+  return (
+    <Picker.Item label={label} value={value} style={itemStyle} />
+  );
+}
+
 export default function ProjectHomeScreen({ route }) {
   const isFocused = useIsFocused();
   const router = useRouter();
@@ -73,15 +88,21 @@ export default function ProjectHomeScreen({ route }) {
   // using the useEffect hook to update thr points and locations visited count from trackings
   useEffect(() => {
     const updatePointsAndLocationsVisited = () => {
-        let points = 0;
+        try {
+          let points = 0;
         const locationsVisited = new Set();
         userTrackings.forEach(tracking => {
             const location = locations.find((loc) => loc.id === tracking.location_id);
-            points += location.score_points;
-            locationsVisited.add(location.location_name);
+            if (location) {
+                points += location.score_points;
+                locationsVisited.add(location.location_name);
+            }
         });
         setPoints(points);
         setLocationsVisited(Array.from(locationsVisited));
+        } catch (error) {
+            console.warn('Error updating points and locations visited:', error);
+        }
     };
     updatePointsAndLocationsVisited();
   }, [userTrackings, locations, isFocused]);
@@ -100,13 +121,6 @@ export default function ProjectHomeScreen({ route }) {
     if (newLocation !== 'Homescreen') {
         const location = locations.find((loc) => loc.location_name === newLocation);
         const newLocationsVisited = new Set([...locationsVisited, location.location_name]);
-        const pointCompute = () => {
-            // if the location has not been visited before, add the points
-            if (!locationsVisited.includes(location.location_name)) {
-                return points + location.score_points;
-            }
-            return points;
-        };
         // alert if the selected location is already visited
         if (locationsVisited.includes(location.location_name)) {
             Alert.alert(
@@ -115,39 +129,13 @@ export default function ProjectHomeScreen({ route }) {
                 [{ text: 'OK' }]
             );
         }
-        setPoints(pointCompute());
         setLocationsVisited(Array.from(newLocationsVisited));
-    } else {
-        //setPoints(0);
-        //setLocationsVisited([]);
     }
   };
 
-  // /**
-  //  * Fit the map bounds to the markers.
-  //  * @param {Object} locations - The locations array
-  //  * @returns {null} - Returns null
-  //  */
-  // const FitMapBounds = ({ locations }) => {
-  //   const map = useMap(); // Get the map instance
-
-  //   useEffect(() => {
-  //       if (locations.length > 0) {
-  //           const bounds = locations.map(location => {
-  //               const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
-  //               return [latitude, longitude];
-  //           });
-  //           map.fitBounds(bounds); // Automatically fit bounds to markers
-  //       }
-  //   }, [locations, map]);
-
-  //   return null;
-  // };
-
   if (!project || locations.length === 0) {
     return <Text>No location found. Keep loading...</Text>;
-}
-
+  }
 
   return (
     <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -161,23 +149,31 @@ export default function ProjectHomeScreen({ route }) {
       onValueChange={handleLocationChange}
       style={styles.picker}
     >
-      <Picker.Item label="Homescreen" value="Homescreen" />
+      <Picker.Item label="Homescreen" value="Homescreen" style={styles.visited} />
       {locations.map((location) => (
-        <Picker.Item key={location.id} label={location.location_name} value={location.location_name} />
+        <StyledPickerItem
+          key={location.id}
+          label={location.location_name}
+          value={location.location_name}
+          selectedLocation={selectedLocation}
+          locationsVisited={locationsVisited}
+        />
       ))}
     </Picker>
 
     {selectedLocation === 'Homescreen' ? (
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Instructions</Text>
-        <Text>{project.initial_clue}</Text>
+        <Text style={styles.content}>{project.initial_clue}</Text>
       </View>
     ) : (
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Location Clue</Text>
-        <Text>{locations.find(loc => loc.location_name === selectedLocation)?.clue}</Text>
+        {/* add icon to each title */}
+        <Text style={styles.sectionTitle}>Location Clue 🕵️</Text>
+        {/* put text in a gray box */}
+        <Text style={styles.content}>{locations.find(loc => loc.location_name === selectedLocation)?.clue}</Text>
 
-        <Text style={styles.sectionTitle}>Location Content</Text>
+        <Text style={styles.sectionTitle}>Location Content 📜</Text>
         {
           (locations.find(loc => loc.location_name === selectedLocation)?.location_content) ? (
             <WebView
@@ -206,50 +202,81 @@ export default function ProjectHomeScreen({ route }) {
     <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
     </View>
   </ScrollView>
-);
-  };
-
-  const styles = StyleSheet.create({
-    titleContainer: {
-      backgroundColor: '#8A2BE2',
-      padding: 16,
-      borderRadius: 8,
-      alignItems: 'center',
-      marginBottom: 16,
-    },
-    titleText: {
-      color: '#fff',
-      fontSize: 24,
-      fontWeight: 'bold',
-      textAlign: 'center',
-    },
-    picker: {
-      marginVertical: 20,
-      height: 50,
-      width: '100%',
-    },
-    section: {
-      backgroundColor: '#f9f9f9',
-      padding: 16,
-      borderRadius: 8,
-      marginBottom: 16,
-    },
-    sectionTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 8,
-    },
-    webview: {
-      height: 200,
-      borderRadius: 8,
-    },
-    footerContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 20,
-    },
-    backButton: {
-      marginVertical: 20,
-      flex: 1,
-    },
-  });
+  );
+};
+  
+const styles = StyleSheet.create({
+  titleContainer: {
+    backgroundColor: '#8A2BE2',
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  titleText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  picker: {
+    marginVertical: 20,
+    height: 50,
+    width: '100%',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  section: {
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    paddingHorizontal: 16, // Ensure text padding on both sides
+    paddingVertical: 16, // Ensure text padding on top and bottom
+    textAlign: 'left', // Align text to the left for readability
+    width: '100%',            // Use full width of the container
+    color: '#8A2BE2',
+    
+  },
+  webview: {
+    height: 200,
+    borderRadius: 8,
+  },
+  footerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  backButton: {
+    marginVertical: 20,
+    flex: 1,
+  },
+  // add content into a gray box
+  content: {
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  picker: {
+    marginVertical: 20,
+    height: 50,
+    width: '100%',
+  },
+  visited: {
+    color: 'green',
+    fontWeight: 'bold',
+  },
+  unvisited: {
+    color: 'blue',
+  },
+  selected: {
+    borderColor: '#8A2BE2',
+    borderWidth: 2,
+  },
+});
+  

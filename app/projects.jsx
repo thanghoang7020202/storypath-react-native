@@ -48,25 +48,25 @@ export default function ProjectList() {
 
   // Render each project item
   const renderProjectItem = ({ item }) => (
-    <View style={styles.projectItem}>
-      <View style={styles.projectInfo}>
-        <Text style={styles.projectTitle}>{item.title}</Text>
-        <View style={styles.participantsBadge}>
-          <Text style={styles.participantsText}>Participants: 
-            {projectParticipantCounts.find((count) => count.project_id === item.id)?.number_participants || 0}</Text>
-        </View>
+    <TouchableOpacity
+    style={styles.projectItem}
+    onPress={() => {
+      router.push({ pathname: `./ProjectHomeScreen/${item.id}?username=${username}` });
+    }}
+  >
+    <View style={styles.projectInfo}>
+      <Text style={styles.projectTitle}>{item.title}</Text>
+      <View style={styles.participantsBadge}>
+        <Text style={styles.participantsText}>
+          Participants: {projectParticipantCounts.find((count) => count.project_id === item.id)?.number_participants || 0}
+        </Text>
       </View>
-
-      <TouchableOpacity
-        style={styles.arrowButton}
-        // go to the projectHomeScreen after clicking the arrow
-        onPress={() => {
-          router.push({ pathname: `./ProjectHomeScreen/${item.id}?username=${username}` });
-        }}
-      >
-        <Text style={styles.arrowText}>➔</Text>
-      </TouchableOpacity>
     </View>
+
+    <View style={styles.arrowButton}>
+      <Text style={styles.arrowText}>➔</Text>
+    </View>
+  </TouchableOpacity>
   );
 
   return (
@@ -123,6 +123,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 5,
     marginTop: 5,
+    // make fix the length of the badge
+    width: 150,
   },
   participantsText: {
     color: '#fff',
