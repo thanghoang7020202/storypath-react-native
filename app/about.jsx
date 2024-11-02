@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Linking, ScrollView, TouchableOpacity, Button }
 import { useRouter } from 'expo-router';
 
 const About = () => {
-  const router = useRouter();
+  const router = useRouter();     // Get the router object
   
   return (
     <ScrollView contentContainerStyle={styles.container}>

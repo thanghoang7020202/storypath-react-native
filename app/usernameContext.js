@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState } from 'react';
 const UsernameContext = createContext(
   {
     username: 'participant_username', // Default value for the username
-    setUsername: () => {} // Default value for the function
+    setUsername: () => {}             // Default value for the function
   }
 );
 
