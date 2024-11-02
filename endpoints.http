@@ -121,13 +121,11 @@ Authorization : Bearer {{jwtToken}}
 Content-Type: application/json
 
 {
-    "project_id": 2030,
-    "location_id": 5533,
     "username": "s4759487"
 }
 
 ### delete a tracking entry
-DELETE {{baseUrl}}/api/tracking?id=eq.10102
+DELETE {{baseUrl}}/api/tracking?id=eq.20762
 Authorization : Bearer {{jwtToken}}
 Content-Type: application/json
 

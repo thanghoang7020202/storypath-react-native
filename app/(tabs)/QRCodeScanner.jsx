@@ -5,7 +5,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import { useProjectId } from ".././projectIdContext";
 import { useUsername } from "../usernameContext";
-import { getTrackings, addTracking, getLocations } from "../../components/api";
+import { getTrackings, addTracking, getLocations, getProjects } from "../../components/api";
 
 export default function QRCodeScanner() {
   const isFocused = useIsFocused();
@@ -17,6 +17,7 @@ export default function QRCodeScanner() {
   const fireworkRef = useRef(null);
   const [permission, requestPermission] = useCameraPermissions();
   const { projectId } = useProjectId();
+  const [project, setProject] = useState(null);
   const { username } = useUsername();
 
   useEffect(() => {
@@ -26,6 +27,10 @@ export default function QRCodeScanner() {
         const locationData = await getLocations();
         const projectLocations = locationData.filter(location => location.project_id === projectId);
         setLocations(projectLocations);
+
+        const projectData = await getProjects();
+        const project = projectData.find(project => project.id === projectId);
+        setProject(project);
 
         const trackingData = await getTrackings();
         const projectTrackings = trackingData.filter(tracking => tracking.project_id === projectId);
@@ -43,8 +48,10 @@ export default function QRCodeScanner() {
 
     // Check if the scanned data matches any location name and hasn't been tracked
     const matchingLocation = locations.find(location => location.location_name.trim() === data.trim());
-    // check if matched location has location_trigger is ""Both Location Entry and QR Code Scan" or "QR Code Scan"
-    if (matchingLocation.location_trigger !== "Both Location Entry and QR Code Scan" && matchingLocation.location_trigger !== "QR Code Scan") {
+    
+    // UNCOMMNENT THE LINE BELOW to test location_trigger, otherwise project.participant_scoring will be used
+    //if (matchingLocation.location_trigger !== "Both Location Entry and QR Code Scan" && matchingLocation.location_trigger !== "QR Code Scan") {
+    if (project.participant_scoring === "Number of Locations Entered") {
       Alert.alert('QR Code', 'This location requires a physical visit!', [
         { text: 'Try Again', onPress: () => setScanned(false) },
       ]);

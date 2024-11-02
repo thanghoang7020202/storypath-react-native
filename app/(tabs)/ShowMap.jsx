@@ -7,7 +7,7 @@ import { getDistance } from "geolib";
 //import { locations } from "../data/locations";
 import { useProjectId } from ".././projectIdContext";
 import { useUsername } from "../usernameContext";
-import { getProject, getTrackings, addTracking, getLocations } from "../../components/api";
+import { getProject, getTrackings, addTracking, getLocations, getProjects } from "../../components/api";
 
 // Define Stylesheet
 const styles = StyleSheet.create({
@@ -71,12 +71,16 @@ export default function ShowMap() {
     const [trackings, setTrackings] = useState([]);
     const [isWithin100m, setIsWithin100m] = useState(false);
     const [nearestLocation, setNearestLocation] = useState(null); // new
+    const [project, setProject] = useState(null);
 
     // update trackings
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const trackingData = await getTrackings();
+                const projectData = await getProjects();
+                const project = projectData.find(project => project.id === projectId);
+                setProject(project);
                 const data = trackingData.filter(tracking => tracking.project_id == projectId);
                 console.log("trackings", data);
                 setTrackings(data);
@@ -93,15 +97,15 @@ export default function ShowMap() {
                 const locationData = await getLocations();
                 const data = locationData.filter(location => location.project_id == projectId);
                 const updatedLocations = data.map(location => {
-                    if (location.location_trigger === "Location Entry" || location.location_trigger === "Both Location Entry and QR Code Scan") {
-                        const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
-                        return {
-                            id: location.id,
-                            location: location.location_name,
-                            score_points: location.score_points,
-                            coordinates: { latitude, longitude }
-                        };
-                    }
+                // UNCOMMNENT THE LINE BELOW to test location_trigger, otherwise project.participant_scoring will be used
+                //if (location.location_trigger === "Location Entry" || location.location_trigger === "Both Location Entry and QR Code Scan") {
+                const [latitude, longitude] = location.location_position.slice(1, -1).split(',').map(coord => parseFloat(coord.trim()));
+                return {
+                    id: location.id,
+                    location: location.location_name,
+                    score_points: location.score_points,
+                    coordinates: { latitude, longitude }
+                };
                     return null;
                 }).filter(Boolean);
                 
@@ -112,14 +116,15 @@ export default function ShowMap() {
             }
         };
         fetchData();
-    }, [projectId]);
+    }, [projectId, project, isWithin100m, nearestLocation, isFocused]);
 
     // add a new tracking entry if user is within 100m of a location entry point and has not visited the location before (not in trackings)
     useEffect(() => {
         const addTrackingEntry = async () => {
             // Check if nearestLocation exists and is within 100m
             if (isWithin100m && nearestLocation
-                && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)) {
+                && !trackings.some(tracking => tracking.location_id === nearestLocation.id && tracking.participant_username === username)
+                && (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Not Scored")) { 
                 const newTracking = {
                     project_id: projectId,
                     location_id: nearestLocation.id,

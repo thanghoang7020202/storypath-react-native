@@ -83,25 +83,30 @@ export default function ProjectHomeScreen({ route }) {
       }
     };
     fetchProjectAndLocations();
-}, [id, isFocused]);
+}, [id, isFocused, projectId, usernameFromRoute]);
 
   // using the useEffect hook to update thr points and locations visited count from trackings
   useEffect(() => {
     const updatePointsAndLocationsVisited = () => {
         try {
           let points = 0;
-        const locationsVisited = new Set();
-        userTrackings.forEach(tracking => {
+          const locationsVisited = new Set();
+          userTrackings.forEach(tracking => {
             const location = locations.find((loc) => loc.id === tracking.location_id);
             if (location) {
                 points += location.score_points;
                 locationsVisited.add(location.location_name);
             }
-        });
-        setPoints(points);
-        setLocationsVisited(Array.from(locationsVisited));
+          });
+          // Options include: "Not Scored", "Number of Scanned QR Codes", "Number of Locations Entered"
+          if (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Number of Scanned QR Codes") {
+            setPoints(points);
+          } else {
+            setPoints("Not Scored");
+          }
+          setLocationsVisited(Array.from(locationsVisited));
         } catch (error) {
-            console.warn('Error updating points and locations visited:', error);
+          console.warn('Error updating points and locations visited:', error);
         }
     };
     updatePointsAndLocationsVisited();
@@ -120,7 +125,6 @@ export default function ProjectHomeScreen({ route }) {
     // Update score and locations visited count
     if (newLocation !== 'Homescreen') {
         const location = locations.find((loc) => loc.location_name === newLocation);
-        const newLocationsVisited = new Set([...locationsVisited, location.location_name]);
         // alert if the selected location is already visited
         if (locationsVisited.includes(location.location_name)) {
             Alert.alert(
@@ -129,7 +133,6 @@ export default function ProjectHomeScreen({ route }) {
                 [{ text: 'OK' }]
             );
         }
-        setLocationsVisited(Array.from(newLocationsVisited));
     }
   };
 
@@ -184,16 +187,13 @@ export default function ProjectHomeScreen({ route }) {
             <Text>No content available for this location</Text>
           )
         }
-        {/* <WebView
-          source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
-          style={styles.webview}
-        /> */}
       </View>
     )}
 
     {/* Points and Locations Visited */}
     <View style={styles.footerContainer}>
-      <Button title={`Points: ${points} / ${totalPoints}`} onPress={() => {}} color="#8A2BE2" />
+      {/* if points is "Not Scored" then show "Not Scored" else show points/ totalPoints */}
+      <Button title={`Points: ${points === "Not Scored" ? "Not Scored" : `${points} / ${totalPoints}`}`} onPress={() => {}} color="#8A2BE2" />
       <Button title={`Locations Visited: ${locationsVisited.length} / ${locations.length}`} onPress={() => {}} color="#8A2BE2" />
     </View>
 
