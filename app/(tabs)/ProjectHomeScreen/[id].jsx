@@ -46,7 +46,7 @@ export default function ProjectHomeScreen({ route }) {
     const welcomeMessage = async () => {
       Alert.alert(
         "✨ Welcome to Your Adventure! ✨",
-        `Hello ${username}! Welcome to ${project.title}! 🎉🎉🎉
+        `Hello ${username}! 🎉🎉🎉
         \n---- Game Overview 🕹️ ----
         • Select a location from the dropdown below.
         • Follow clues to explore the area! 🗺️
@@ -169,7 +169,12 @@ export default function ProjectHomeScreen({ route }) {
       {locations.map((location) => (
         <StyledPickerItem
           key={location.id}
-          label={"📍 " + location.location_name}
+          // if location is visited then show the location name else "📍 Hidden location".
+          label={
+            locationsVisited.includes(location.location_name)
+              ? `📍 ${location.location_name}`
+              : "📍 Hidden location"
+          }
           value={location.location_name}
           selectedLocation={selectedLocation}
           locationsVisited={locationsVisited}

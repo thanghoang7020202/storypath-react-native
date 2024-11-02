@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, Button } from 'react-native';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { useGlobalSearchParams, useLocalSearchParams, useRouter } from 'expo-router';
 import { getProjects, deleteProject, getProjectParticipantCounts, addTracking, getTrackings } from "../components/api";
@@ -81,6 +81,8 @@ export default function ProjectList() {
       ) : (
         <Text>No projects available. Keep loading...</Text>
       )}
+
+    <Button title="Go Back" onPress={() => router.back()} color={'#8A2BE2'} />
     </View>
   );
 }
