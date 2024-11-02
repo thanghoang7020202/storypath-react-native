@@ -40,16 +40,35 @@ export default function ProjectHomeScreen({ route }) {
   const [totalPoints, setTotalPoints] = useState(0);
   const [locationsVisited, setLocationsVisited] = useState([]);
   const [userTrackings, setUserTrackings] = useState([]);
+  const [viewInstructions, setViewInstructions] = useState(true);
 
   useEffect(() => {
-    const wellcomeMessage = async () => {
+    const welcomeMessage = async () => {
       Alert.alert(
-        "🎉✨ Welcome, Superstar! ✨🎉", 
-        `Hey ${username}!\n\nLove to see you here! Let's get started! 🚀🚀🚀`
+        "✨ Welcome to Your Adventure! ✨",
+        `Hello ${username}! Welcome to ${project.title}! 🎉🎉🎉
+        \n---- Game Overview 🕹️ ----
+        • Select a location from the dropdown below.
+        • Follow clues to explore the area! 🗺️
+        • Some locations may require:
+            - A 🗺️ Physical Visit (marked with a map icon).
+            - A 🔍 QR Code Scan (marked with a QR icon).
+        • Your points and the number of visited locations update automatically!
+  
+        \n---- Earn Points 📈 ----
+        • Certain locations offer points.
+        • Earn by visiting and scanning QR codes.
+  
+        \n---- Discover Content 📜 ----
+        • Once a location is visited, location content will be displayed.
+  
+        🌟 ENJOY YOUR JOURNEY! 🌟,`
       );
-    }
-    wellcomeMessage();
-  }, [username]);
+    };
+    welcomeMessage();
+  }, [username, viewInstructions]);
+  
+
 
   /**
      * Fetch the project and locations when the component mounts.
@@ -99,7 +118,7 @@ export default function ProjectHomeScreen({ route }) {
             }
           });
           // Options include: "Not Scored", "Number of Scanned QR Codes", "Number of Locations Entered"
-          if (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Number of Scanned QR Codes") {
+          if (project && (project.participant_scoring === "Number of Locations Entered" || project.participant_scoring === "Number of Scanned QR Codes")) {
             setPoints(points);
           } else {
             setPoints("Not Scored");
@@ -110,7 +129,7 @@ export default function ProjectHomeScreen({ route }) {
         }
     };
     updatePointsAndLocationsVisited();
-  }, [userTrackings, locations, isFocused]);
+  }, [userTrackings, locations, isFocused, project]);
 
 
   /**
@@ -125,14 +144,6 @@ export default function ProjectHomeScreen({ route }) {
     // Update score and locations visited count
     if (newLocation !== 'Homescreen') {
         const location = locations.find((loc) => loc.location_name === newLocation);
-        // alert if the selected location is already visited
-        if (locationsVisited.includes(location.location_name)) {
-            Alert.alert(
-                'Location Already Visited',
-                'You have already visited this location. Please select another location.',
-                [{ text: 'OK' }]
-            );
-        }
     }
   };
 
@@ -151,12 +162,14 @@ export default function ProjectHomeScreen({ route }) {
       selectedValue={selectedLocation}
       onValueChange={handleLocationChange}
       style={styles.picker}
+      // add style to the all the items in the picker
+      itemStyle={{ fontSize: 18, color: 'blue', fontWeight: 'bold' }}
     >
       <Picker.Item label="Homescreen" value="Homescreen" style={styles.visited} />
       {locations.map((location) => (
         <StyledPickerItem
           key={location.id}
-          label={location.location_name}
+          label={"📍 " + location.location_name}
           value={location.location_name}
           selectedLocation={selectedLocation}
           locationsVisited={locationsVisited}
@@ -178,13 +191,14 @@ export default function ProjectHomeScreen({ route }) {
 
         <Text style={styles.sectionTitle}>Location Content 📜</Text>
         {
-          (locations.find(loc => loc.location_name === selectedLocation)?.location_content) ? (
+          // Display the location content in a WebView if content is available and that location is visited (in trackings)
+          (locations.find(loc => loc.location_name === selectedLocation)?.location_content && locationsVisited.includes(selectedLocation)) ? (
             <WebView
               source={{ html: locations.find(loc => loc.location_name === selectedLocation)?.location_content }}
               style={styles.webview}
             />
           ) : (
-            <Text>No content available for this location</Text>
+            <Text>You have not visited this location yet... 🚶‍♂️</Text>
           )
         }
       </View>
@@ -197,8 +211,13 @@ export default function ProjectHomeScreen({ route }) {
       <Button title={`Locations Visited: ${locationsVisited.length} / ${locations.length}`} onPress={() => {}} color="#8A2BE2" />
     </View>
 
-    <View style={styles.backButton}>
+    {/* View Instructions Button */}
+    <View style={styles.viewInstructions}>
+      <Button title="View Instructions" onPress={() => setViewInstructions(!viewInstructions)} color="#8A2BE2" />
+    </View>
+
     {/* Back Button */}
+    <View style={styles.backButton}>
     <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
     </View>
   </ScrollView>
@@ -277,6 +296,9 @@ const styles = StyleSheet.create({
   selected: {
     borderColor: '#8A2BE2',
     borderWidth: 2,
+  },
+  viewInstructions: {
+    marginTop: 20,
   },
 });
   

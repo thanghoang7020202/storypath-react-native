@@ -22,6 +22,23 @@ Authorization: Bearer {{jwtToken}}
     "username": "s4759487"
 }
 
+### Post a project to the server
+POST {{baseUrl}}/api/project
+Authorization: Bearer {{jwtToken}}
+Content-Type: application/json
+
+{
+    "title": "participant_scoring: Number of Scanned QR Codes",
+    "description": "Test Number of Scanned QR Codes",
+    "is_published": true,
+    "participant_scoring": "Number of Scanned QR Codes",
+    "username": "s4759487",
+    "instructions": "Instructions for mapProject",
+    "initial_clue": "This is the initial clue",
+    "homescreen_display": "Display initial clue",
+    "username": "s4759487"
+}
+
 ### get all locations for all projects
 GET {{baseUrl}}/api/location
 Authorization: Bearer {{jwtToken}}
@@ -43,10 +60,17 @@ POST {{baseUrl}}/api/location
 Authorization : Bearer {{jwtToken}}
 
 {
-    "id": 5533,
-    "project_id": 2030,
-    "location_name": "UQ St Lucia",
-    "location_trigger": "UQ St Lucia",
+    
+    "project_id": 19611,
+    "location_name": "UQ Sport Fitness Centre",
+    "location_trigger": "Location Entry",
+    "location_position": "(-27.49575201000884,153.01581444393574)",
+    "location_order": 0,
+    "username": "s4759487",
+    "location_content": "<p>LOC CONTENT test webview</p>",
+    "extra": null,
+    "clue": "no clue",
+    "score_points": 20,
     "username": "s4759487"
 }
 

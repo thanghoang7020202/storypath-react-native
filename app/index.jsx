@@ -23,7 +23,7 @@ export default function Index() {
 
   return (
     <View style={styles.container}>
-        <Text style={styles.title}>Welcome to StoryPath</Text>
+        <Text style={styles.title}>🌟Welcome to StoryPath 🌟</Text>
         <Text style={styles.subtitle}>Explore Unlimited Location-based Experiences</Text>
         <Text style={styles.description}>
           With StoryPath, you can discover and create amazing location-based adventures. From city
@@ -31,22 +31,12 @@ export default function Index() {
         </Text>
 
         <TouchableOpacity style={styles.button} onPress={ () => router.push( { pathname: '/profile'} ) }>
-          <Text style={styles.buttonText}>Create Profile</Text>
+          <Text style={styles.buttonText}>{username ? 'View Profile' : 'Create Profile'}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.button} onPress={() => router.push('/projects')}>
           <Text style={styles.buttonText}>Explore Projects</Text>
-        </TouchableOpacity>
-
-          {/* <Profile style={styles.buttonText} updateUsername={handleUsernameChange} user={user} /> 
-          click the button to go to the Profile screen with parameters same as above*/}
-          {/* <Modal style={styles.button} visible={isProfileVisible} animationType="slide" onRequestClose={toggleProfile}>
-            <Profile updateUsername={handleUsernameChange} user={user} onCloseProfile={toggleProfile} />
-          </Modal> */}
-          
-          {/* <TouchableOpacity onPress={toggleProfile}>
-            <Text style={styles.buttonText}>Create Profile</Text>
-          </TouchableOpacity> */}        
+        </TouchableOpacity>       
     </View>
   );
 }
