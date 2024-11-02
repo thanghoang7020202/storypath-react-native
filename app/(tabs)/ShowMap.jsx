@@ -168,10 +168,14 @@ export default function ShowMap() {
         async function requestLocationPermission() {
             const { status } = await Location.requestForegroundPermissionsAsync();
             if (status === 'granted') {
+                let newLocation = locations;
+                if (project && project.homescreen_display != "Display all locations") {
+                    newLocation = locations.filter(location => trackings.some(tracking => tracking.location_id === location.id && tracking.participant_username === username));
+                }
                 setMapState(prevState => ({
                     ...prevState,
                     // filter out locations that are not in trackings
-                    locations: locations.filter(location => trackings.some(tracking => tracking.location_id === location.id && tracking.participant_username === username)),
+                    locations: newLocation,
                     locationPermission: true
                 }));
             }
