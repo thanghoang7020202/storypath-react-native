@@ -165,13 +165,14 @@ export default function ShowMap() {
             if (status === 'granted') {
                 setMapState(prevState => ({
                     ...prevState,
-                    locations: locations,
+                    // filter out locations that are not in trackings
+                    locations: locations.filter(location => trackings.some(tracking => tracking.location_id === location.id && tracking.participant_username === username)),
                     locationPermission: true
                 }));
             }
         }
         requestLocationPermission();
-    }, [locations]);
+    }, [locations, trackings, username]);
 
     useEffect(() => {
         // Function to retrieve location nearest to current user location
