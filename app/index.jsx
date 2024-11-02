@@ -1,22 +1,27 @@
 import { View, Text, Button, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import React, { useState } from 'react';
 import { useRouter } from "expo-router";
-
 import { useUsername, UsernameProvider } from './usernameContext';  // Use the context
-import Profile from './profile'; // Import the Profile component
+import Profile from './profile';                                    // Import the Profile component
 
 export default function Index() {
 
-  const router = useRouter(); // Get the router object
-  //const [user, setUser] = useState('participant_username'); // Default username state
-  const { username, setUsername } = useUsername(); // Use the context
-  const [isProfileVisible, setProfileVisible] = useState(false); // State to control modal visibility
+  const router = useRouter();                                     // Get the router object
+  const { username, setUsername } = useUsername();                // Use the context
+  const [isProfileVisible, setProfileVisible] = useState(false);  // State to control modal visibility
 
-  // Function to handle the username change
+  /**
+   * Function to handle the username change
+   * @param {String} username The new username
+   */
   function handleUsernameChange(username) {
     setUsername(username); // Update the username
   }
 
+  /**
+   * Function to toggle the profile modal visibility
+   * @returns {void}
+   * */
   function toggleProfile() {
     setProfileVisible(!isProfileVisible);
   }
@@ -30,10 +35,12 @@ export default function Index() {
           tours to treasure hunts, the possibilities are endless!
         </Text>
 
+        {/* Profile Button */}
         <TouchableOpacity style={styles.button} onPress={ () => router.push( { pathname: '/profile'} ) }>
           <Text style={styles.buttonText}>{username ? 'View Profile' : 'Create Profile'}</Text>
         </TouchableOpacity>
 
+        {/* Explore Projects Button */}
         <TouchableOpacity style={styles.button} onPress={() => router.push('/projects')}>
           <Text style={styles.buttonText}>Explore Projects</Text>
         </TouchableOpacity>       
