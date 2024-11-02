@@ -148,7 +148,12 @@ export default function ProjectHomeScreen({ route }) {
   };
 
   if (!project || locations.length === 0) {
-    return <Text>No location found. Keep loading...</Text>;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>No location found. Keep loading...</Text>
+        <Button title="Go Back" onPress={() => router.push('/projects')} color="#8A2BE2" />
+      </View>
+    );
   }
 
   return (
@@ -173,7 +178,7 @@ export default function ProjectHomeScreen({ route }) {
           label={
             locationsVisited.includes(location.location_name)
               ? `📍 ${location.location_name}`
-              : "📍 Hidden location"
+              : "📍 Hidden location..."
           }
           value={location.location_name}
           selectedLocation={selectedLocation}

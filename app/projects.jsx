@@ -72,6 +72,7 @@ export default function ProjectList() {
   return (
     <View style={styles.container}>
       <Text style={styles.heading}>Projects</Text>
+      <Text style={styles.subTitle}>Choose one of the projects below to get started.</Text>
       {projectList.length > 0 ? (
         <FlatList
           data={projectList}
@@ -140,5 +141,10 @@ const styles = StyleSheet.create({
   arrowText: {
     fontSize: 24,
     color: '#8A2BE2',
+  },
+  subTitle: {
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 10,
   },
 });
