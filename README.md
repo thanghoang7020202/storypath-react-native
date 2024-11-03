@@ -51,7 +51,9 @@ To set up this project locally:
 
 4. **Run the app**: Follow the instructions to run the app on an iOS or Android emulator, or connect a physical device.
 
-Note: This app is tested on 2 Android physical devices, Samsung Galaxy S22 Ultra and Samsung Galaxy S24 Ultra, via [Expo Go](https://expo.dev/go) app.
+Note: 
+- This app is tested on 2 Android physical devices, Samsung Galaxy S22 Ultra and Samsung Galaxy S24 Ultra, via [Expo Go](https://expo.dev/go) app.
+- PLease visit "Testing.docx" or "Testing.pdf" for more information.
 
 ## Usage
 
