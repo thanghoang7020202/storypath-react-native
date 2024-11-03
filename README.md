@@ -53,7 +53,7 @@ To set up this project locally:
 
 Note: 
 - This app is tested on 2 Android physical devices, Samsung Galaxy S22 Ultra and Samsung Galaxy S24 Ultra, via [Expo Go](https://expo.dev/go) app.
-- PLease visit "A3 Testing.docx" or "A3 Testing.pdf" for more information.
+- PLease visit "Testing.docx" or "Testing.pdf" for more information.
 
 ## Usage
 
